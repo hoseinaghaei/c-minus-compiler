@@ -38,7 +38,7 @@ class DFA:
 
         # equal
         (STATE.EQUAL, Token.EQUAL, STATE.EQUAL_EQUAL),
-        (STATE.EQUAL, Token.DELIMITER, STATE.INIT),
+        (STATE.EQUAL, Token.ANY, STATE.INIT),
 
         # equal equal
         (STATE.EQUAL_EQUAL, Token.ANY, STATE.INIT),
