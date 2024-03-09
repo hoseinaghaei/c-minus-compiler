@@ -1,6 +1,6 @@
 from enum import Enum
-from collections import namedtuple
-from enums import TokenType
+from utils import Token, TokenType, keywords, SymbolTable
+import re
 
 
 class STATE(Enum):
@@ -14,104 +14,139 @@ class STATE(Enum):
     SLASH_STAR = 10
     STAR = 11
     STAR_SLASH = 12
-    # BLANK = 15
 
 
 class DFA:
     current_state = STATE.INIT
     next = [
         # init
-        (STATE.INIT, TokenType.DIGIT, STATE.DIGIT),
-        (STATE.INIT, TokenType.LETTER, STATE.LETTER_DIGIT),
-        (STATE.INIT, TokenType.EQUAL, STATE.EQUAL),
-        (STATE.INIT, TokenType.SYMBOL, STATE.SYMBOL),
-        (STATE.INIT, TokenType.SLASH, STATE.SLASH),
-        (STATE.INIT, TokenType.BLANK, STATE.INIT),
+        (STATE.INIT, Token.DIGIT, STATE.DIGIT),
+        (STATE.INIT, Token.LETTER, STATE.LETTER_DIGIT),
+        (STATE.INIT, Token.EQUAL, STATE.EQUAL),
+        (STATE.INIT, Token.SYMBOL, STATE.SYMBOL),
+        (STATE.INIT, Token.SLASH, STATE.SLASH),
+        (STATE.INIT, Token.BLANK, STATE.INIT),
+        (STATE.INIT, Token.EOF, STATE.INIT),
 
         # digit
-        (STATE.DIGIT, TokenType.DIGIT, STATE.DIGIT),
-        (STATE.DIGIT, TokenType.DELIMITER, STATE.INIT),
+        (STATE.DIGIT, Token.DIGIT, STATE.DIGIT),
+        (STATE.DIGIT, Token.DELIMITER, STATE.INIT),
 
         # id, keyword
-        (STATE.LETTER_DIGIT, TokenType.LETTER_DIGIT, STATE.LETTER_DIGIT),
-        (STATE.LETTER_DIGIT, TokenType.DIGIT, STATE.INIT),
+        (STATE.LETTER_DIGIT, Token.LETTER_DIGIT, STATE.LETTER_DIGIT),
+        (STATE.LETTER_DIGIT, Token.DELIMITER, STATE.INIT),
 
         # equal
-        (STATE.EQUAL, TokenType.EQUAL, STATE.EQUAL_EQUAL),
-        (STATE.EQUAL, TokenType.DELIMITER, STATE.INIT),
+        (STATE.EQUAL, Token.EQUAL, STATE.EQUAL_EQUAL),
+        (STATE.EQUAL, Token.DELIMITER, STATE.INIT),
 
         # equal equal
-        (STATE.EQUAL_EQUAL, TokenType.ANY, STATE.INIT),
+        (STATE.EQUAL_EQUAL, Token.ANY, STATE.INIT),
 
         # symbol
-        (STATE.SYMBOL, TokenType.ANY, STATE.INIT),
+        (STATE.SYMBOL, Token.ANY, STATE.INIT),
 
         # slash
-        (STATE.SLASH, TokenType.STAR, STATE.SLASH_STAR),
+        (STATE.SLASH, Token.STAR, STATE.SLASH_STAR),
 
         # slash star
-        (STATE.SLASH_STAR, TokenType.STAR, STATE.STAR),
-        (STATE.SLASH_STAR, TokenType.ANY, STATE.SLASH_STAR),
+        (STATE.SLASH_STAR, Token.STAR, STATE.STAR),
+        (STATE.SLASH_STAR, Token.ANY, STATE.SLASH_STAR),
 
         # star
-        (STATE.STAR, TokenType.STAR, STATE.STAR),
-        (STATE.STAR, TokenType.STAR, STATE.STAR_SLASH),
+        (STATE.STAR, Token.STAR, STATE.STAR),
+        (STATE.STAR, Token.SLASH, STATE.STAR_SLASH),
 
         # star slash
-        (STATE.STAR, TokenType.STAR, STATE.INIT)
+        (STATE.STAR_SLASH, Token.ANY, STATE.INIT)
     ]
 
 
 dfa = DFA()
-lineno = 0
+symbol_table = SymbolTable()
 file = open('input.txt')
-buffer = ''
+token_file = open('tokens.txt', 'w')
+token_file.write("1\t")
 
-import re
+lineno = 1
+look_ahead = False
+look_ahead_char = None
+eof = False
+
+
+def eval_token_type(token: str, state: STATE):
+    if state == STATE.DIGIT:
+        return TokenType.NUM.value, int(token)
+    if state == STATE.LETTER_DIGIT:
+        if token in keywords:
+            return TokenType.KEYWORD.value, token
+        else:
+            symbol_table.add_id_if_not_exist(token)
+            return TokenType.ID.value, token
+
+    if state in [STATE.SYMBOL, STATE.EQUAL_EQUAL, STATE.EQUAL]:
+        return TokenType.SYMBOL.value, token
+
+    return False, False
 
 
 def read_next_token():
-    print("start")
-    while 1:
-        c = file.read(1)
-        print("\n\n")
-        print(c)
-        if re.match(TokenType.DIGIT.value, c):
-            print("digit")
+    global lineno, look_ahead, look_ahead_char, eof
+    token = ''
 
-        if re.match(TokenType.LETTER.value, c):
-            print("letter")
+    while True:
+        current_state = dfa.current_state
+        next_states = [i for i in dfa.next if i[0] == current_state]
 
-        if re.match(TokenType.LETTER.value, c):
-            print("letter digit")
-        if re.match(TokenType.SYMBOL.value, c):
-            print("symbol")
+        if look_ahead:
+            c = look_ahead_char
+        else:
+            c = file.read(1)
 
-        if re.match(TokenType.EQUAL.value, c):
-            print("equal")
+        next_state = current_state
+        for state in next_states:
+            if re.match(state[1].value, c):
+                next_state = state[2]
+                if next_state != STATE.INIT:
+                    token += c
+                else:
+                    look_ahead = True
+                    look_ahead_char = c
+                break
+        else:
+            if re.match(Token.EOF.value, c):
+                eof = True
+            else:
+                # todo: error handling
+                print("Invalid data - shit compiler" + str(current_state) + str(next_state) + c)
+            next_state = STATE.INIT
 
-        if re.match(TokenType.SLASH.value, c):
-            print("slash")
+        token_type, token_identified = False, False
+        if next_state == STATE.INIT:
+            token_type, token_identified = eval_token_type(token, dfa.current_state)
+            if not token_identified:
+                token = ''
 
-        if re.match(TokenType.STAR.value, c):
-            print("star")
+        if dfa.current_state == STATE.INIT:
+            look_ahead = False
+            if c == '\n':
+                lineno += 1
+                token_file.write("\n" + str(lineno) + "\t")
 
-        if re.match(TokenType.BLANK.value, c):
-            print("blank")
+        dfa.current_state = next_state
 
-        if re.match(TokenType.DELIMITER.value, c):
-            print("delimiter")
-
-        if re.match(TokenType.EOF.value, c):
-            print("end of file")
-
-        if re.match(TokenType.ANY.value, c):
-            print("Any")
-
-        if c == '':
-            print("done reading")
-            exit(0)
+        if token_identified:
+            return token_type, token_identified
 
 
 def get_next_token():
-    read_next_token()
+    global eof
+    while True:
+        token_type, token_identified = read_next_token()
+        token_tuple = "(" + token_type + ", " + str(token_identified) + ")"
+        print(token_tuple + " in line " + str(lineno))
+        token_file.write(token_tuple + ' ')
+
+        if eof:
+            print("EOF")
+            exit(0)
