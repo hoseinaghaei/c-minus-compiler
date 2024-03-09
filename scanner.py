@@ -26,7 +26,6 @@ class DFA:
         (STATE.INIT, Token.SYMBOL, STATE.SYMBOL),
         (STATE.INIT, Token.SLASH, STATE.SLASH),
         (STATE.INIT, Token.BLANK, STATE.INIT),
-        (STATE.INIT, Token.EOF, STATE.INIT),
 
         # digit
         (STATE.DIGIT, Token.DIGIT, STATE.DIGIT),
@@ -137,15 +136,18 @@ def read_next_token():
 
         if token_identified:
             return token_type, token_identified
+        if eof:
+            return 'eof', ''
 
 
 def get_next_token():
-    global eof
+    global eof, lineno
     while True:
         token_type, token_identified = read_next_token()
-        token_tuple = "(" + token_type + ", " + str(token_identified) + ")"
-        print(token_tuple + " in line " + str(lineno))
-        token_file.write(token_tuple + ' ')
+        if token_type != 'eof':
+            token_tuple = "(" + token_type + ", " + str(token_identified) + ")"
+            print(token_tuple + " in line " + str(lineno))
+            token_file.write(token_tuple + ' ')
 
         if eof:
             print("EOF")
