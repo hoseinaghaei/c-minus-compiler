@@ -151,4 +151,7 @@ def get_next_token():
 
         if eof:
             print("EOF")
+            symbol_table.write()
+            token_file.close()
+            file.close()
             exit(0)

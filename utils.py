@@ -52,3 +52,4 @@ class SymbolTable(object):
         with open('symbol_table.txt', 'w') as f:
             for item in self.items:
                 f.write(f"{item.id}\t{item.lexeme}\n")
+            f.close()
