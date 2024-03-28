@@ -96,7 +96,7 @@ def eval_token_type(token: str, state: STATE):
     if state in [STATE.SYMBOL, STATE.EQUAL_EQUAL, STATE.EQUAL]:
         return TokenType.SYMBOL.value, token
 
-    return False, False
+    return False, None
 
 
 def read_next_token():
@@ -149,10 +149,10 @@ def read_next_token():
                 token = ''
             next_state = STATE.INIT
 
-        token_type, token_identified = False, False
+        token_type, token_identified = False, None
         if next_state == STATE.INIT and not token_has_lexical_error:
             token_type, token_identified = eval_token_type(token, dfa.current_state)
-            if not token_identified:
+            if token_identified is None:
                 token = ''
 
         if dfa.current_state == STATE.INIT:
@@ -163,7 +163,7 @@ def read_next_token():
 
         dfa.current_state = next_state
 
-        if token_identified:
+        if token_identified is not None:
             return token_type, token_identified
         if eof:
             return 'eof', ''
