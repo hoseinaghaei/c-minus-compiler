@@ -12,8 +12,9 @@ class STATE(Enum):
     SYMBOL = 8
     SLASH = 9
     SLASH_STAR = 10
-    STAR = 11
+    COMMENT_ENDING_STAR = 11
     STAR_SLASH = 12
+    STAR = 13
 
 
 class DFA:
@@ -23,6 +24,7 @@ class DFA:
         (STATE.INIT, Token.DIGIT, STATE.DIGIT),
         (STATE.INIT, Token.LETTER, STATE.LETTER_DIGIT),
         (STATE.INIT, Token.EQUAL, STATE.EQUAL),
+        (STATE.INIT, Token.STAR, STATE.STAR),
         (STATE.INIT, Token.SYMBOL, STATE.SYMBOL),
         (STATE.INIT, Token.SLASH, STATE.SLASH),
         (STATE.INIT, Token.BLANK, STATE.INIT),
@@ -30,10 +32,12 @@ class DFA:
         # digit
         (STATE.DIGIT, Token.DIGIT, STATE.DIGIT),
         (STATE.DIGIT, Token.DELIMITER, STATE.INIT),
+        # (STATE.DIGIT, Token.INVALID, STATE.INIT),
 
         # id, keyword
         (STATE.LETTER_DIGIT, Token.LETTER_DIGIT, STATE.LETTER_DIGIT),
         (STATE.LETTER_DIGIT, Token.DELIMITER, STATE.INIT),
+        # (STATE.LETTER_DIGIT, Token.INVALID, STATE.INIT),
 
         # equal
         (STATE.EQUAL, Token.EQUAL, STATE.EQUAL_EQUAL),
@@ -42,6 +46,9 @@ class DFA:
         # equal equal
         (STATE.EQUAL_EQUAL, Token.ANY, STATE.INIT),
 
+        # star
+        (STATE.STAR, Token.NOT_SLASH, STATE.INIT),
+
         # symbol
         (STATE.SYMBOL, Token.ANY, STATE.INIT),
 
@@ -49,12 +56,13 @@ class DFA:
         (STATE.SLASH, Token.STAR, STATE.SLASH_STAR),
 
         # slash star
-        (STATE.SLASH_STAR, Token.STAR, STATE.STAR),
+        (STATE.SLASH_STAR, Token.STAR, STATE.COMMENT_ENDING_STAR),
         (STATE.SLASH_STAR, Token.ANY, STATE.SLASH_STAR),
 
-        # star
-        (STATE.STAR, Token.STAR, STATE.STAR),
-        (STATE.STAR, Token.SLASH, STATE.STAR_SLASH),
+        # comment ending star
+        (STATE.COMMENT_ENDING_STAR, Token.STAR, STATE.COMMENT_ENDING_STAR),
+        (STATE.COMMENT_ENDING_STAR, Token.SLASH, STATE.STAR_SLASH),
+        (STATE.COMMENT_ENDING_STAR, Token.ANY, STATE.SLASH_STAR),
 
         # star slash
         (STATE.STAR_SLASH, Token.ANY, STATE.INIT)
@@ -65,12 +73,14 @@ dfa = DFA()
 symbol_table = SymbolTable()
 file = open('input.txt')
 token_file = open('tokens.txt', 'w')
+lexical_error_file = open('lexical_errors.txt', 'w')
 token_file.write("1\t")
 
 lineno = 1
 look_ahead = False
 look_ahead_char = None
 eof = False
+input_has_lexical_error = False
 
 
 def eval_token_type(token: str, state: STATE):
@@ -90,10 +100,11 @@ def eval_token_type(token: str, state: STATE):
 
 
 def read_next_token():
-    global lineno, look_ahead, look_ahead_char, eof
+    global lineno, look_ahead, look_ahead_char, eof, input_has_lexical_error
     token = ''
 
     while True:
+        token_has_lexical_error = False
         current_state = dfa.current_state
         next_states = [i for i in dfa.next if i[0] == current_state]
 
@@ -115,13 +126,31 @@ def read_next_token():
         else:
             if re.match(Token.EOF.value, c):
                 eof = True
+                if dfa.current_state in [STATE.SLASH, STATE.SLASH_STAR, STATE.COMMENT_ENDING_STAR]:
+                    input_has_lexical_error = True
+                    token_has_lexical_error = True
+                    token += c
+                    if len(token) > 7:
+                        token = token[:7] + "..."
+                    lexical_error_file.write(str(lineno) + "\t" + "(" + token + ", " + "Unclosed comment" + ")\n")
             else:
-                # todo: error handling
-                print("Invalid data - shit compiler" + str(current_state) + str(next_state) + c)
+                input_has_lexical_error = True
+                token_has_lexical_error = True
+                token += c
+                error_message = "Invalid input"
+                if dfa.current_state == STATE.INIT:
+                    error_message = "Invalid input"
+                elif dfa.current_state == STATE.STAR:
+                    error_message = "Unmatched comment"
+                elif dfa.current_state == STATE.DIGIT:
+                    error_message = "Invalid number"
+                lexical_error_file.write(str(lineno) + "\t" + "(" + token + ", " + error_message + ")\n")
+                look_ahead = False
+                token = ''
             next_state = STATE.INIT
 
         token_type, token_identified = False, False
-        if next_state == STATE.INIT:
+        if next_state == STATE.INIT and not token_has_lexical_error:
             token_type, token_identified = eval_token_type(token, dfa.current_state)
             if not token_identified:
                 token = ''
@@ -152,6 +181,9 @@ def get_next_token():
         if eof:
             print("EOF")
             symbol_table.write()
+            if not input_has_lexical_error:
+                lexical_error_file.write("There is no lexical error.")
             token_file.close()
+            lexical_error_file.close()
             file.close()
             exit(0)

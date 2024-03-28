@@ -9,15 +9,16 @@ class Token(Enum):
     DIGIT = '[0-9]'
     LETTER = '[A-Za-z]'
     LETTER_DIGIT = '[A-Za-z0-9]'
-    KEYWORD = '(if|else|void|int|for|break|return|endif)'
-    SYMBOL = '[;:,\[\]\(\)\{\}\+\-\*<]'
+    SYMBOL = r'[;:,\[\]\(\)\{\}\+\-\*<]'
     EQUAL = '='
     SLASH = '/'
-    STAR = '\*'
+    NOT_SLASH = '[^/]'
+    STAR = r'\*'
     BLANK = r'[ \n\r\t\v\f]'
     DELIMITER = r'[ \n\r\t\v\f;:,\[\]\(\)\{\}\+\-\*<=(==)]'
-    EOF = '\Z'
-    ANY = '[.\d\D\s\S]'
+    EOF = r'\Z'
+    ANY = r'[.\d\D\s\S]'
+    # INVALID = r'[^ \n\r\t\v\f\Z/=;:,\[\]\(\)\{\}\+\-\*<[A-Za-z0-9]]'
 
 
 class TokenType(Enum):
