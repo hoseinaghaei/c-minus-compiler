@@ -73,11 +73,13 @@ class DFA:
 
 dfa = DFA()
 symbol_table = SymbolTable()
-file = open('input.txt')
+file = None
 token_file = open('tokens.txt', 'w')
 lexical_error_file = open('lexical_errors.txt', 'w')
 
 lineno = 1
+comment_start_line = lineno
+comment = False
 first_token_of_line = True
 previous_token = None
 last_lexical_error_line = 0
@@ -103,8 +105,23 @@ def eval_token_type(token: str, state: STATE):
     return False, None
 
 
+def write_lexical_error(token, message, line):
+    global last_lexical_error_line, lexical_error_file, input_has_lexical_error
+    if line == last_lexical_error_line:
+        lexical_error_file.write(f"({token}, {message}) ")
+    else:
+        if last_lexical_error_line != 0:
+            lexical_error_file.write("\n")
+        lexical_error_file.write(f"{str(line)}.\t({token}, {message}) ")
+
+    input_has_lexical_error = True
+    last_lexical_error_line = line
+
+
 def read_next_token():
-    global lineno, look_ahead, look_ahead_char, eof, input_has_lexical_error, first_token_of_line, last_lexical_error_line
+    global lineno, look_ahead, look_ahead_char, eof, \
+        input_has_lexical_error, first_token_of_line, last_lexical_error_line, \
+        comment_start_line, comment, file
     token = ''
 
     while True:
@@ -120,6 +137,9 @@ def read_next_token():
         for state in next_states:
             if re.match(state[1].value, c):
                 next_state = state[2]
+                if next_state == STATE.STAR_SLASH and not comment:
+                    write_lexical_error("*/", "Unmatched comment", lineno)
+
                 if next_state != STATE.INIT:
                     token += c
                 else:
@@ -129,41 +149,27 @@ def read_next_token():
         else:
             if re.match(Token.EOF.value, c):
                 eof = True
-                if dfa.current_state in [STATE.SLASH, STATE.SLASH_STAR, STATE.COMMENT_ENDING_STAR]:
-                    input_has_lexical_error = True
+                if dfa.current_state in [STATE.SLASH_STAR, STATE.COMMENT_ENDING_STAR]:
                     token_has_lexical_error = True
                     token += c
                     if len(token) > 7:
                         token = token[:7] + "..."
-                    if lineno == last_lexical_error_line:
-                        lexical_error_file.write("(" + token + ", " + "Unclosed comment" + ") ")
-                    else:
-                        if last_lexical_error_line != 0:
-                            lexical_error_file.write("\n")
-                        lexical_error_file.write(str(lineno) + ".\t" + "(" + token + ", " + "Unclosed comment" + ") ")
-                        last_lexical_error_line = lineno
+                    write_lexical_error(token, "Unclosed comment", comment_start_line)
+                else:
+                    if dfa.current_state == STATE.SLASH:
+                        write_lexical_error(Token.SLASH.value, "Invalid input", lineno)
+
             else:
-                input_has_lexical_error = True
                 token_has_lexical_error = True
                 token += c
                 error_message = "Invalid input"
-                if dfa.current_state == STATE.INIT:
-                    error_message = "Invalid input"
-                elif dfa.current_state == STATE.STAR and eof:
-                    error_message = "Unmatched comment"
-                elif dfa.current_state == STATE.DIGIT:
+                if dfa.current_state == STATE.DIGIT:
                     error_message = "Invalid number"
 
-                if lineno == last_lexical_error_line:
-                    lexical_error_file.write("(" + token + ", " + error_message + ") ")
-                else:
-                    if last_lexical_error_line != 0:
-                        lexical_error_file.write("\n")
-                    lexical_error_file.write(str(lineno) + ".\t" + "(" + token + ", " + error_message + ") ")
-                    last_lexical_error_line = lineno
-
+                write_lexical_error(token, error_message, lineno)
                 look_ahead = False
                 token = ''
+
             next_state = STATE.INIT
 
         token_type, token_identified = False, None
@@ -172,13 +178,19 @@ def read_next_token():
             if token_identified is None:
                 token = ''
 
-        if dfa.current_state == STATE.INIT:
+        if dfa.current_state in [STATE.INIT, STATE.SLASH_STAR, STATE.COMMENT_ENDING_STAR]:
             look_ahead = False
             if c == '\n':
                 lineno += 1
                 first_token_of_line = True
 
         dfa.current_state = next_state
+        if not comment and dfa.current_state == STATE.SLASH_STAR:
+            comment = True
+            comment_start_line = lineno
+
+        if dfa.current_state not in [STATE.SLASH_STAR, STATE.COMMENT_ENDING_STAR]:
+            comment = False
 
         if token_identified is not None:
             return token_type, token_identified
@@ -194,8 +206,10 @@ def write_new_line():
     token_file.write(f"{line}{lineno}.\t")
 
 
-def get_next_token():
-    global eof, lineno, first_token_of_line, previous_token
+def get_next_token(input_name='input.txt'):
+    global eof, lineno, first_token_of_line, previous_token, file, lexical_error_file
+    file = open(input_name)
+
     while True:
         token_type, token_identified = read_next_token()
         if token_type != 'eof':
