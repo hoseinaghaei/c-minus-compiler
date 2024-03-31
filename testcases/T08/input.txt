@@ -1,0 +1,19 @@
+int f (int a) {return a;}
+int arr;
+int min(voi$$ efg){
+	if (arr[efg] == TT&*){
+			int b = 10 + 1; return f(b);}
+		if(arr[efg] === 3)
+			break;
+			return f(b = b + 2);
+		else (arr[ef%g] * arr)
+		{
+			void x = 5;
+			b = x * 123;
+			int y = f(10);return 3 * x * y;}endif
+	}endif
+	return;
+}
+
+
+void main(void){return min (@); int x = 10 - 3; x = min(x); return x; return 0;}

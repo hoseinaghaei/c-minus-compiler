@@ -1,0 +1,28 @@
+void g(int b){
+	return b * b * b - 2 * b + b;
+}
+
+int f(int a) {
+    void g(int b) {
+        output(b);
+        f(b - 1);
+    }
+
+    if (a < 1) {
+        out$put£(g(a - 2b);
+        return 0;
+    }
+ endif
+return f(g(a + 3));
+
+
+
+}
+
+
+void main(void) {
+int a = 9;
+int aA$% = 10
+    f(a);
+	f(a);/*a$$a&&a##*/;;;;
+}

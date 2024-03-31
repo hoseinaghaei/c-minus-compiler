@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Union, List
 
 keywords = ['break', 'else', 'if', 'endif', 'int', 'for', 'return', 'void']
 
@@ -18,7 +17,6 @@ class Token(Enum):
     DELIMITER = r'[ \n\r\t\v\f;:,\[\]\(\)\{\}\+\-\*<=(==)]'
     EOF = r'\Z'
     ANY = r'[.\d\D\s\S]'
-    # INVALID = r'[^ \n\r\t\v\f\Z/=;:,\[\]\(\)\{\}\+\-\*<[A-Za-z0-9]]'
 
 
 class TokenType(Enum):
@@ -52,5 +50,5 @@ class SymbolTable(object):
     def write(self):
         with open('symbol_table.txt', 'w') as f:
             for item in self.items:
-                f.write(f"{item.id}\t{item.lexeme}\n")
+                f.write(f"{item.id}.\t{item.lexeme}\n")
             f.close()

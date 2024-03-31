@@ -1,0 +1,45 @@
+int b;
+int f(int d, int e){
+	if (d < 0) return 0;
+    int v = f(d) - f(d - 1);
+	b = e + v;
+	
+	for ( ;d < 0; d = d - 1){
+		v = (v + d) * v
+		if (d == 10)
+			break;
+		else
+			d = #d1
+		endif
+
+
+	/*comment1*/
+	return v + /*comment2*/ b;
+}
+
+
+int arr[3];
+void main(void){
+	int a = 3 + 11;
+	b = 5 * (a + foo(a, a));
+	arr[0] = b - 3;
+	arr[1] = b + 3;
+
+	int C;
+	if (b /*comment2*/ == 3){
+		arr[2] = f(arr[0], arr[1]);;	
+	}
+	else
+	{
+		if (arr[2] < 2){
+				C = b + 1;}
+			else if (arr[2] < 54){
+				C = b + 2;
+				return;}
+			else
+				{C = arr[2];}
+			endif
+		}	
+	}
+	return 0;
+}

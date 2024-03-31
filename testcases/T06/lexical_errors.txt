@@ -1,0 +1,3 @@
+32.	(void$, Invalid input) 
+34.	(f$, Invalid input) (a$, Invalid input) 
+43.	(#, Invalid input) 

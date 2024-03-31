@@ -1,0 +1,42 @@
+int a;
+int func(int b, int ccc){
+    int f;
+	void func2(int k){
+		return k[0] + k[1] * 87;	
+	}
+	int f[2] = 5;
+	f[0] = ccc;
+	fff[1] = 7 + 1;
+	f = func2(func(1, 4));
+	b = ;
+	for (int jk = 10; d < 0; d = d - 1){int m = f[1] + b; 
+	if (d == )
+			break;
+		else d == 1;}
+	/* comment1 */
+	return f[b] + b;
+}
+int a = ;
+int arr[a];
+void main(void){
+	int a;
+	a = -3 + +11;
+	a + a;
+	b = 5 * a + foo(a, a);
+	arr[1] = b + -3;
+	arr[2] = foo(arr[0], arr[1]);
+	if (b /*comment2*/ == 3 /*comment3*/){
+		arr[0] =/*comment4*/ -7;	
+	}
+	else
+	{	
+return func(arr[2]);
+	}
+	return main;
+}
+
+int foo(int d, int e){
+    int a;
+    a = 5;
+    if (a == 5) retrun a; else a = a + 1 endif;
+}

@@ -47,7 +47,9 @@ class DFA:
         (STATE.EQUAL_EQUAL, Token.ANY, STATE.INIT),
 
         # star
-        (STATE.STAR, Token.NOT_SLASH, STATE.INIT),
+        (STATE.STAR, Token.SLASH, STATE.STAR_SLASH),
+        (STATE.STAR, Token.DELIMITER, STATE.INIT),
+        (STATE.STAR, Token.LETTER_DIGIT, STATE.INIT),
 
         # symbol
         (STATE.SYMBOL, Token.ANY, STATE.INIT),
@@ -74,9 +76,11 @@ symbol_table = SymbolTable()
 file = open('input.txt')
 token_file = open('tokens.txt', 'w')
 lexical_error_file = open('lexical_errors.txt', 'w')
-token_file.write("1\t")
 
 lineno = 1
+first_token_of_line = True
+previous_token = None
+last_lexical_error_line = 0
 look_ahead = False
 look_ahead_char = None
 eof = False
@@ -93,14 +97,14 @@ def eval_token_type(token: str, state: STATE):
             symbol_table.add_id_if_not_exist(token)
             return TokenType.ID.value, token
 
-    if state in [STATE.SYMBOL, STATE.EQUAL_EQUAL, STATE.EQUAL]:
+    if state in [STATE.SYMBOL, STATE.EQUAL_EQUAL, STATE.EQUAL, STATE.STAR]:
         return TokenType.SYMBOL.value, token
 
     return False, None
 
 
 def read_next_token():
-    global lineno, look_ahead, look_ahead_char, eof, input_has_lexical_error
+    global lineno, look_ahead, look_ahead_char, eof, input_has_lexical_error, first_token_of_line, last_lexical_error_line
     token = ''
 
     while True:
@@ -113,7 +117,6 @@ def read_next_token():
         else:
             c = file.read(1)
 
-        next_state = current_state
         for state in next_states:
             if re.match(state[1].value, c):
                 next_state = state[2]
@@ -132,7 +135,13 @@ def read_next_token():
                     token += c
                     if len(token) > 7:
                         token = token[:7] + "..."
-                    lexical_error_file.write(str(lineno) + "\t" + "(" + token + ", " + "Unclosed comment" + ")\n")
+                    if lineno == last_lexical_error_line:
+                        lexical_error_file.write("(" + token + ", " + "Unclosed comment" + ") ")
+                    else:
+                        if last_lexical_error_line != 0:
+                            lexical_error_file.write("\n")
+                        lexical_error_file.write(str(lineno) + ".\t" + "(" + token + ", " + "Unclosed comment" + ") ")
+                        last_lexical_error_line = lineno
             else:
                 input_has_lexical_error = True
                 token_has_lexical_error = True
@@ -140,11 +149,19 @@ def read_next_token():
                 error_message = "Invalid input"
                 if dfa.current_state == STATE.INIT:
                     error_message = "Invalid input"
-                elif dfa.current_state == STATE.STAR:
+                elif dfa.current_state == STATE.STAR and eof:
                     error_message = "Unmatched comment"
                 elif dfa.current_state == STATE.DIGIT:
                     error_message = "Invalid number"
-                lexical_error_file.write(str(lineno) + "\t" + "(" + token + ", " + error_message + ")\n")
+
+                if lineno == last_lexical_error_line:
+                    lexical_error_file.write("(" + token + ", " + error_message + ") ")
+                else:
+                    if last_lexical_error_line != 0:
+                        lexical_error_file.write("\n")
+                    lexical_error_file.write(str(lineno) + ".\t" + "(" + token + ", " + error_message + ") ")
+                    last_lexical_error_line = lineno
+
                 look_ahead = False
                 token = ''
             next_state = STATE.INIT
@@ -159,7 +176,7 @@ def read_next_token():
             look_ahead = False
             if c == '\n':
                 lineno += 1
-                token_file.write("\n" + str(lineno) + "\t")
+                first_token_of_line = True
 
         dfa.current_state = next_state
 
@@ -169,14 +186,25 @@ def read_next_token():
             return 'eof', ''
 
 
+def write_new_line():
+    global lineno, previous_token
+    line = ''
+    if previous_token is not None:
+        line = '\n'
+    token_file.write(f"{line}{lineno}.\t")
+
+
 def get_next_token():
-    global eof, lineno
+    global eof, lineno, first_token_of_line, previous_token
     while True:
         token_type, token_identified = read_next_token()
         if token_type != 'eof':
             token_tuple = "(" + token_type + ", " + str(token_identified) + ")"
-            print(token_tuple + " in line " + str(lineno))
+            if first_token_of_line:
+                write_new_line()
+                first_token_of_line = False
             token_file.write(token_tuple + ' ')
+            previous_token = token_identified
 
         if eof:
             print("EOF")
