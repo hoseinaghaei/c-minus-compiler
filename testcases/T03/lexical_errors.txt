@@ -1,1 +1,1 @@
-4.	(*#, Invalid input) 
+4.	(#, Invalid input) 

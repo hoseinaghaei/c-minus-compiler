@@ -14,7 +14,7 @@ class Token(Enum):
     NOT_SLASH = '[^/]'
     STAR = r'\*'
     BLANK = r'[ \n\r\t\v\f]'
-    DELIMITER = r'[ \n\r\t\v\f;:,\[\]\(\)\{\}\+\-\*<=(==)]'
+    DELIMITER = r'[ \n\r\t\v\f;:,\[\]\(\)\{\}\+\-\*<=/]'
     EOF = r'\Z'
     ANY = r'[.\d\D\s\S]'
 

@@ -32,12 +32,10 @@ class DFA:
         # digit
         (STATE.DIGIT, Token.DIGIT, STATE.DIGIT),
         (STATE.DIGIT, Token.DELIMITER, STATE.INIT),
-        # (STATE.DIGIT, Token.INVALID, STATE.INIT),
 
         # id, keyword
         (STATE.LETTER_DIGIT, Token.LETTER_DIGIT, STATE.LETTER_DIGIT),
         (STATE.LETTER_DIGIT, Token.DELIMITER, STATE.INIT),
-        # (STATE.LETTER_DIGIT, Token.INVALID, STATE.INIT),
 
         # equal
         (STATE.EQUAL, Token.EQUAL, STATE.EQUAL_EQUAL),
@@ -48,8 +46,7 @@ class DFA:
 
         # star
         (STATE.STAR, Token.SLASH, STATE.STAR_SLASH),
-        (STATE.STAR, Token.DELIMITER, STATE.INIT),
-        (STATE.STAR, Token.LETTER_DIGIT, STATE.INIT),
+        (STATE.STAR, Token.ANY, STATE.INIT),
 
         # symbol
         (STATE.SYMBOL, Token.ANY, STATE.INIT),
@@ -119,8 +116,7 @@ def write_lexical_error(token, message, line):
 
 
 def read_next_token():
-    global lineno, look_ahead, look_ahead_char, eof, \
-        input_has_lexical_error, first_token_of_line, last_lexical_error_line, \
+    global lineno, look_ahead, look_ahead_char, eof, first_token_of_line, \
         comment_start_line, comment, file
     token = ''
 
@@ -221,11 +217,10 @@ def get_next_token(input_name='input.txt'):
             previous_token = token_identified
 
         if eof:
-            print("EOF")
             symbol_table.write()
             if not input_has_lexical_error:
                 lexical_error_file.write("There is no lexical error.")
             token_file.close()
             lexical_error_file.close()
             file.close()
-            exit(0)
+            break
