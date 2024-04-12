@@ -6,15 +6,15 @@ import re
 class STATE(Enum):
     INIT = 0
     DIGIT = 1
-    LETTER_DIGIT = 3
-    EQUAL = 5
-    EQUAL_EQUAL = 6
-    SYMBOL = 8
-    SLASH = 9
-    SLASH_STAR = 10
-    COMMENT_ENDING_STAR = 11
-    STAR_SLASH = 12
-    STAR = 13
+    LETTER_DIGIT = 2
+    EQUAL = 3
+    EQUAL_EQUAL = 4
+    SYMBOL = 5
+    SLASH = 6
+    SLASH_STAR = 7
+    COMMENT_ENDING_STAR = 8
+    STAR_SLASH = 9
+    STAR = 10
 
 
 class DFA:
