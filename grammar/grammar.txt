@@ -1,0 +1,87 @@
+Program⟶ Declarationlist
+Declarationlist⟶ Declaration Declarationlist
+Declarationlist⟶ 
+Declaration⟶ Declarationinitial Declarationprime
+Declarationinitial⟶ Typespecifier ID
+Declarationprime⟶ Fundeclarationprime
+Declarationprime⟶ Vardeclarationprime
+Vardeclarationprime⟶ ;
+Vardeclarationprime⟶ [ NUM ] ;
+Fundeclarationprime⟶ ( Params ) Compoundstmt
+Typespecifier⟶ void
+Typespecifier⟶ int
+Params⟶ int ID Paramprime Paramlist
+Params⟶ void
+Paramlist⟶ , Param Paramlist
+Paramlist⟶ 
+Param⟶ Declarationinitial Paramprime
+Paramprime⟶ [ ]
+Paramprime⟶ 
+Compoundstmt⟶ { Declarationlist Statementlist }
+Statementlist⟶ Statement Statementlist
+Statementlist⟶ 
+Statement⟶ Expressionstmt 
+Statement⟶ Compoundstmt
+Statement⟶ Selectionstmt
+Statement⟶ Iterationstmt
+Statement⟶ Returnstmt
+Expressionstmt⟶ Expression ;
+Expressionstmt⟶ break ;
+Expressionstmt⟶ ;
+Selectionstmt⟶ if ( Expression ) Statement Elsestmt
+Elsestmt⟶ endif
+Elsestmt⟶ else Statement endif
+Iterationstmt⟶ for ( Expression ; Expression ; Expression ) Statement
+Returnstmt⟶ return Returnstmtprime
+Returnstmtprime⟶ ;
+Returnstmtprime⟶ Expression ;
+Expression⟶ Simpleexpressionzegond
+Expression⟶ ID B
+B⟶ = Expression
+B⟶ = [ Expression ] H
+B⟶ = Simpleexpressionprime
+H⟶ = Expression
+H⟶ = G D C
+Simpleexpressionzegond⟶ Additiveexpressionzegond C
+Simpleexpressionprime⟶ Additiveexpressionprime C
+C⟶ Relop Additiveexpression
+C⟶ 
+Relop⟶ <
+Relop⟶ ==
+Additiveexpression⟶ Term D
+Additiveexpressionprime⟶ Termprime D
+Additiveexpressionzegond⟶ Termzegond D
+D⟶ Addop Term D
+D⟶ 
+Addop⟶ +
+Addop⟶ -
+Term⟶ Signedfactor G
+Termprime⟶ Signedfactorprime G
+Termzegond⟶ Signedfactorzegond G
+G⟶ * Signedfactor G
+G⟶ 
+Signedfactor⟶ + Factor
+Signedfactor⟶ - Factor
+Signedfactor⟶ Factor
+Signedfactorprime⟶ Factorprime
+Signedfactorzegond⟶ + Factor
+Signedfactorzegond⟶ - Factor
+Signedfactorzegond⟶ Factorzegond
+Factor⟶ ( Expression )
+Factor⟶ ID Varcallprime
+Factor⟶ NUM
+Varcallprime⟶ ( Args )
+Varcallprime⟶ Varprime
+Varprime⟶ [ Expression ]
+Varprime⟶ 
+Factorprime⟶ ( Args )
+Factorprime⟶ 
+Factorzegond⟶ ( Expression )
+Factorzegond⟶ NUM
+Args⟶ Arglist
+Args⟶ 
+Arglist⟶ Expression Arglistprime
+Arglistprime⟶ , Expression Arglistprime
+Arglistprime⟶ 
+
+
