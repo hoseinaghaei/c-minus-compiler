@@ -1,6 +1,6 @@
 import sys
 
-from scanner import get_next_token
+from scanner import Scanner
 
 
 def compare(file1, file2):
@@ -30,6 +30,9 @@ if __name__ == "__main__":
     dir = sys.argv[1]
     input = f"{dir}/input.txt"
     print(input)
-    get_next_token(input)
+    scanner = Scanner(input)
+    token = scanner.get_next_token()
+    while token != '$':
+        token = scanner.get_next_token()
     compare(f"{dir}/lexical_errors.txt", "lexical_errors.txt")
     compare(f"{dir}/tokens.txt", "tokens.txt")

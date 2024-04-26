@@ -102,6 +102,7 @@ class TokenType(Enum):
     ID = "ID"
     KEYWORD = "KEYWORD"
     SYMBOL = "SYMBOL"
+    EOF = "$"
 
 
 @dataclass

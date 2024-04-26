@@ -1,7 +1,8 @@
 from utils import NonTerminal, Terminal
 
 
-class GrammarTable(object):
+class Grammar(object):
+    statr_non_terminal = NonTerminal.Program
     next = [
         (NonTerminal.Program, [[NonTerminal.Declarationlist]]),
         (NonTerminal.Declarationlist, [[NonTerminal.Declaration, NonTerminal.Declarationlist], [NonTerminal.EPSILON]]),
@@ -104,7 +105,7 @@ class GrammarTable(object):
         NonTerminal.Arglistprime: [Terminal.COMMA, NonTerminal.EPSILON]
     }
 
-    follow = {
+    follows = {
         NonTerminal.Program: [Terminal.DOLLAR],
         NonTerminal.Declarationlist: [Terminal.ID, Terminal.SEMICOLON, Terminal.NUM, Terminal.OPENPARENTHESIS, Terminal.OPENACOLAD, Terminal.CLOSEACOLAD, Terminal.BREAK, Terminal.IF, Terminal.FOR, Terminal.RETURN, Terminal.ADD, Terminal.SUB, Terminal.DOLLAR],
         NonTerminal.Declaration: [Terminal.ID, Terminal.SEMICOLON, Terminal.NUM, Terminal.OPENPARENTHESIS, Terminal.VOID, Terminal.INT, Terminal.OPENACOLAD, Terminal.CLOSEACOLAD, Terminal.BREAK, Terminal.IF, Terminal.FOR, Terminal.RETURN, Terminal.ADD, Terminal.SUB, Terminal.DOLLAR],
@@ -129,8 +130,6 @@ class GrammarTable(object):
         NonTerminal.Expression: [Terminal.SEMICOLON, Terminal.CLOSEBRACET, Terminal.CLOSEPARENTHESIS, Terminal.COMMA],
         NonTerminal.B: [Terminal.SEMICOLON, Terminal.CLOSEBRACET, Terminal.CLOSEPARENTHESIS, Terminal.COMMA],
         NonTerminal.H: [Terminal.SEMICOLON, Terminal.CLOSEBRACET, Terminal.CLOSEPARENTHESIS, Terminal.COMMA],
-        NonTerminal.Simpleexpressionzegond: [Terminal.SEMICOLON, Terminal.CLOSEBRACET, Terminal.CLOSEPARENTHESIS, Terminal.COMMA],
-        NonTerminal.Simpleexpressionprime: [Terminal.SEMICOLON, Terminal.CLOSEBRACET, Terminal.CLOSEPARENTHESIS, Terminal.COMMA],
         NonTerminal.C: [Terminal.SEMICOLON, Terminal.CLOSEBRACET, Terminal.CLOSEPARENTHESIS, Terminal.COMMA],
         NonTerminal.Relop: [Terminal.ID, Terminal.NUM, Terminal.OPENPARENTHESIS, Terminal.ADD, Terminal.SUB],
         NonTerminal.Additiveexpression: [Terminal.SEMICOLON, Terminal.CLOSEBRACET, Terminal.CLOSEPARENTHESIS, Terminal.COMMA],
@@ -154,3 +153,25 @@ class GrammarTable(object):
         NonTerminal.Arglist: [Terminal.CLOSEPARENTHESIS],
         NonTerminal.Arglistprime: [Terminal.CLOSEPARENTHESIS]
     }
+
+    def is_look_ahead_in_follow(self, non_terminal: NonTerminal, look_ahead: str) -> bool:
+        follows = [i.value for i in self.follows[non_terminal]]
+        return look_ahead in follows
+
+    def is_epsilon_in_first(self, non_terminal: NonTerminal) -> bool:
+        return NonTerminal.EPSILON in self.firsts[non_terminal]
+
+    def _get_first(self, name) -> set:
+        if isinstance(name, NonTerminal):
+            return set([i.value for i in self.firsts[name]])
+        else:
+            return {name.value}
+
+    def get_rhs_first(self, rules: list) -> set:
+        firsts = set()
+        for rule in rules:
+            firsts.update(self._get_first(rule))
+            if isinstance(rule, Terminal) or NonTerminal.EPSILON not in self.firsts[rule]:
+                break
+
+        return firsts
