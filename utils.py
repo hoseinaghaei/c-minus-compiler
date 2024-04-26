@@ -95,6 +95,7 @@ class Terminal(Enum):
     ADD = "+"
     SUB = "-"
     STAR = "*"
+    DOLLAR = '$'
 
 class TokenType(Enum):
     NUM = "NUM"
