@@ -204,6 +204,7 @@ class Grammar(object):
         NonTerminal.Expression: [Terminal.SEMICOLON, Terminal.CLOSEBRACET, Terminal.CLOSEPARENTHESIS, Terminal.COMMA],
         NonTerminal.B: [Terminal.SEMICOLON, Terminal.CLOSEBRACET, Terminal.CLOSEPARENTHESIS, Terminal.COMMA],
         NonTerminal.H: [Terminal.SEMICOLON, Terminal.CLOSEBRACET, Terminal.CLOSEPARENTHESIS, Terminal.COMMA],
+        NonTerminal.Simpleexpressionprime: [Terminal.SEMICOLON, Terminal.CLOSEBRACET, Terminal.CLOSEPARENTHESIS, Terminal.COMMA],
         NonTerminal.C: [Terminal.SEMICOLON, Terminal.CLOSEBRACET, Terminal.CLOSEPARENTHESIS, Terminal.COMMA],
         NonTerminal.Relop: [Terminal.ID, Terminal.NUM, Terminal.OPENPARENTHESIS, Terminal.ADD, Terminal.SUB],
         NonTerminal.Additiveexpression: [Terminal.SEMICOLON, Terminal.CLOSEBRACET, Terminal.CLOSEPARENTHESIS,

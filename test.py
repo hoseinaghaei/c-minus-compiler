@@ -35,4 +35,4 @@ if __name__ == "__main__":
         parser.parse()
     else:
         compare(f"{dir}/syntax_errors.txt", "syntax_errors.txt")
-    # compare(f"{dir}/tokens.txt", "tokens.txt")
+        compare(f"{dir}/parse_tree.txt", "parse_tree.txt")

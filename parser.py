@@ -12,6 +12,7 @@ class Parser(object):
         self.look_ahead = None
         self._next_token()
         self.syntax_error_file = open('syntax_errors.txt', 'w')
+        self.parse_tree_file = open('parse_tree.txt', 'w')
         self.input_has_syntax_error = False
         self.current_non_terminal = self.grammar.statr_non_terminal
         self.root = Node(self.grammar.get_non_terminal_display_name(self.current_non_terminal))
@@ -35,23 +36,25 @@ class Parser(object):
         if self.end_of_file_ok:
             Node('$', parent=self.current_node)
 
-        self.syntax_error_file.close()
         for pre, fill, node in RenderTree(self.root):
-            pass
-            # print("%s%s" % (pre, node.name))
+            print("%s%s" % (pre, node.name), file=self.parse_tree_file)
+
+        self.syntax_error_file.close()
+        self.parse_tree_file.close()
         exit(0)
 
     def get_terminal_pair_to_show(self) -> str:
         if self.look_ahead == Terminal.DOLLAR.value:
             return self.look_ahead
 
-        if self.look_ahead_type in [TokenType.ID.value, TokenType.NUM.value]:
+        if self.look_ahead in  [TokenType.ID.value, TokenType.NUM.value]:
             return f"({self.look_ahead}, {self.look_ahead_type})"
         else:
             return f"({self.look_ahead_type}, {self.look_ahead})"
 
     def _match(self, param):
         if param == self.look_ahead:
+            Node(self.get_terminal_pair_to_show(), parent=self.current_node)
             self._next_token()
         else:
             self.input_has_syntax_error = True
@@ -66,11 +69,18 @@ class Parser(object):
                 selected_rule = rule
                 break
 
+        if selected_rule is None and self.grammar.is_look_ahead_in_follow(non_terminal, self.look_ahead):
+            for rule in next_rules:
+                if NonTerminal.EPSILON in rule:
+                    continue
+                if NonTerminal.EPSILON.value in self.grammar.get_rhs_first(rule):
+                    selected_rule = rule
+                    break
+
         if selected_rule is not None:
             for token in selected_rule:
                 if isinstance(token, Terminal):
                     self._match(token.value)
-                    Node(self.get_terminal_pair_to_show(), parent=self.current_node)
                 else:
                     current_node = self.current_node
                     self.current_node = Node(self.grammar.get_non_terminal_display_name(token), parent=current_node)
