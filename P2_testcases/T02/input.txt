@@ -1,0 +1,16 @@
+/* sample 2 */
+
+int add(int a, int b) {
+    return a + b;
+}
+
+void main(void){
+    int a[30];
+    int b[50];
+    int c;
+
+    c = a[15];
+    int addres;
+    addres = add(3, 7);
+    b[49] = c + addres - a[0];
+}

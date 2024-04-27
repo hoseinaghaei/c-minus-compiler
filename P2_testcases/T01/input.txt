@@ -1,0 +1,14 @@
+/* sample 1 */
+
+int d;
+int e;
+
+void main(void){
+	int a;
+	int b;
+	int c;
+	c = 3;
+	a = a * b;
+	d = c + a;
+	e = d - a;
+}

@@ -7,12 +7,21 @@ class Parser(object):
     def __init__(self):
         self.grammar = Grammar()
         self.scanner = Scanner()
-        self.look_ahead = self.scanner.get_next_token()
+        self._next_token()
+        self.syntax_error_file = open('syntax_errors.txt', 'w')
+        self.input_has_syntax_error = False
+
+    def _next_token(self):
+        token, token_type = self.scanner.get_next_token()
+        self.look_ahead = token
+        self.look_ahead_type = token_type
+
 
     def _match(self, param):
         if param == self.look_ahead:
-            self.look_ahead = self.scanner.get_next_token()
+            self._next_token()
         else:
+            self.input_has_syntax_error = True
             # todo: error ‘missing b on line N'
             pass
 
@@ -35,14 +44,19 @@ class Parser(object):
             if self.grammar.is_epsilon_in_first(non_terminal) and is_look_ahead_in_follow:
                 return
 
+            self.input_has_syntax_error = True
             if is_look_ahead_in_follow:
                 # todo: error ‘missing A1 on line N’
                 return
             else:
-                # todo: error ‘illegal a found on line N’
-                self.look_ahead = self.scanner.get_next_token()
+                self.syntax_error_file.write(f"#{self.scanner.lineno} syntax error, illegal {self.look_ahead}")
+                self._next_token()
                 self._do_parse(non_terminal)
 
     def parse(self):
         self._do_parse(self.grammar.statr_non_terminal)
+        if not self.input_has_syntax_error:
+            self.syntax_error_file.write('There is no syntax error.')
+
+        self.syntax_error_file.close()
         pass

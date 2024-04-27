@@ -69,7 +69,7 @@ class DFA:
 
 
 class Scanner(object):
-    def __init__(self, input_file = 'input.txt'):
+    def __init__(self, input_file='input.txt'):
         self.input_file = input_file
         self.file = open(input_file, 'r')
         self.dfa = DFA()
@@ -102,7 +102,6 @@ class Scanner(object):
 
         return False, None
 
-
     def _write_lexical_error(self, token, message, line):
         if line == self.last_lexical_error_line:
             self.lexical_error_file.write(f"({token}, {message}) ")
@@ -110,10 +109,9 @@ class Scanner(object):
             if self.last_lexical_error_line != 0:
                 self.lexical_error_file.write("\n")
             self.lexical_error_file.write(f"{str(line)}.\t({token}, {message}) ")
-    
+
         self.input_has_lexical_error = True
         self.last_lexical_error_line = line
-
 
     def _read_next_token(self):
         token = ''
@@ -214,7 +212,13 @@ class Scanner(object):
             self.lexical_error_file.close()
             self.file.close()
 
-        if token_type in  [TokenType.SYMBOL.value, TokenType.KEYWORD.value]:
-            return token_identified
+        if token_type in [TokenType.SYMBOL.value, TokenType.KEYWORD.value]:
+            return token_identified, token_type
         else:
-            return token_type
+            return token_type, token_identified
+
+        # ;, SYMBOL
+        # if, KEYWORD
+        # NUM, 3
+        # ID, a
+        # $, $
