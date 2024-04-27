@@ -2,7 +2,7 @@ from utils import NonTerminal, Terminal
 
 
 class Grammar(object):
-    statr_non_terminal = NonTerminal.Program
+    start_non_terminal = NonTerminal.Program
     next = [
         (NonTerminal.Program, [[NonTerminal.Declarationlist]]),
         (NonTerminal.Declarationlist, [[NonTerminal.Declaration, NonTerminal.Declarationlist], [NonTerminal.EPSILON]]),
@@ -37,10 +37,10 @@ class Grammar(object):
         (NonTerminal.Returnstmtprime, [[Terminal.SEMICOLON], [NonTerminal.Expression, Terminal.SEMICOLON]]),
         (NonTerminal.Expression, [[NonTerminal.Simpleexpressionzegond], [Terminal.ID, NonTerminal.B]]),
         (NonTerminal.B, [[Terminal.EQUAL, NonTerminal.Expression],
-                         [Terminal.OPENBRACET, NonTerminal.Expression, Terminal.CLOSEBRACET,NonTerminal.H],
+                         [Terminal.OPENBRACET, NonTerminal.Expression, Terminal.CLOSEBRACET, NonTerminal.H],
                          [NonTerminal.Simpleexpressionprime]]),
         (NonTerminal.H,
-         [[Terminal.EQUAL, NonTerminal.Expression], [Terminal.EQUAL, NonTerminal.G, NonTerminal.D, NonTerminal.C]]),
+         [[Terminal.EQUAL, NonTerminal.Expression], [NonTerminal.G, NonTerminal.D, NonTerminal.C]]),
         (NonTerminal.Simpleexpressionzegond, [[NonTerminal.Additiveexpressionzegond, NonTerminal.C]]),
         (NonTerminal.Simpleexpressionprime, [[NonTerminal.Additiveexpressionprime, NonTerminal.C]]),
         (NonTerminal.C, [[NonTerminal.Relop, NonTerminal.Additiveexpression], [NonTerminal.EPSILON]]),
@@ -239,12 +239,63 @@ class Grammar(object):
         NonTerminal.Arglistprime: [Terminal.CLOSEPARENTHESIS]
     }
 
+    simplest_string = {
+        NonTerminal.Program: "",
+        NonTerminal.Declarationlist: "",
+        NonTerminal.Declaration: "",
+        NonTerminal.Declarationinitial: "",
+        NonTerminal.Declarationprime: "",
+        NonTerminal.Vardeclarationprime: "",
+        NonTerminal.Fundeclarationprime: "",
+        NonTerminal.Typespecifier: "",
+        NonTerminal.Params: "",
+        NonTerminal.Paramlist: "",
+        NonTerminal.Param: "",
+        NonTerminal.Paramprime: "",
+        NonTerminal.Compoundstmt: "",
+        NonTerminal.Statementlist: "",
+        NonTerminal.Statement: "",
+        NonTerminal.Expressionstmt: "",
+        NonTerminal.Selectionstmt: "",
+        NonTerminal.Elsestmt: "",
+        NonTerminal.Iterationstmt: "",
+        NonTerminal.Returnstmt: "",
+        NonTerminal.Returnstmtprime: "",
+        NonTerminal.Expression: "",
+        NonTerminal.B: "",
+        NonTerminal.H: "",
+        NonTerminal.Simpleexpressionzegond: "",
+        NonTerminal.Simpleexpressionprime: "",
+        NonTerminal.C: "",
+        NonTerminal.Relop: "",
+        NonTerminal.Additiveexpression: "",
+        NonTerminal.Additiveexpressionprime: "",
+        NonTerminal.Additiveexpressionzegond: "",
+        NonTerminal.D: "",
+        NonTerminal.Addop: "",
+        NonTerminal.Term: "",
+        NonTerminal.Termprime: "",
+        NonTerminal.Termzegond: "",
+        NonTerminal.G: "",
+        NonTerminal.Signedfactor: "",
+        NonTerminal.Signedfactorprime: "",
+        NonTerminal.Signedfactorzegond: "",
+        NonTerminal.Factor: "",
+        NonTerminal.Varcallprime: "",
+        NonTerminal.Varprime: "",
+        NonTerminal.Factorprime: "",
+        NonTerminal.Factorzegond: "",
+        NonTerminal.Args: "",
+        NonTerminal.Arglist: "",
+        NonTerminal.Arglistprime: ""
+    }
+
     def is_look_ahead_in_follow(self, non_terminal: NonTerminal, look_ahead: str) -> bool:
         follows = [i.value for i in self.follows[non_terminal]]
         return look_ahead in follows
 
-    def is_epsilon_in_first(self, non_terminal: NonTerminal) -> bool:
-        return NonTerminal.EPSILON in self.firsts[non_terminal]
+    # def is_epsilon_in_first(self, non_terminal: NonTerminal) -> bool:
+    #     return NonTerminal.EPSILON in self.firsts[non_terminal]
 
     def _get_first(self, name) -> set:
         if isinstance(name, NonTerminal) and name != NonTerminal.EPSILON:
@@ -259,8 +310,7 @@ class Grammar(object):
             if rule == NonTerminal.EPSILON:
                 continue
             if isinstance(rule, Terminal) or NonTerminal.EPSILON not in self.firsts[rule]:
-                if NonTerminal.EPSILON in firsts:
-                    firsts.remove({NonTerminal.EPSILON})
+                if NonTerminal.EPSILON.value in firsts:
+                    firsts.remove(NonTerminal.EPSILON.value)
                 break
-
         return firsts

@@ -70,6 +70,7 @@ class NonTerminal(Enum):
     Arglistprime = "ARGLISTPRIME"
     EPSILON = "EPSILON"
 
+
 class Terminal(Enum):
     ID = "ID"
     SEMICOLON = ";"
@@ -96,6 +97,7 @@ class Terminal(Enum):
     SUB = "-"
     STAR = "*"
     DOLLAR = '$'
+
 
 class TokenType(Enum):
     NUM = "NUM"
