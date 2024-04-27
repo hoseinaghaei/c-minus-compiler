@@ -1,6 +1,6 @@
 import sys
 
-from scanner import Scanner
+from parser import Parser
 
 
 def compare(file1, file2):
@@ -28,11 +28,11 @@ def compare(file1, file2):
 
 if __name__ == "__main__":
     dir = sys.argv[1]
+    run = int(sys.argv[2])
     input = f"{dir}/input.txt"
-    print(input)
-    scanner = Scanner(input)
-    token = scanner.get_next_token()
-    while token != '$':
-        token = scanner.get_next_token()
-    compare(f"{dir}/lexical_errors.txt", "lexical_errors.txt")
-    compare(f"{dir}/tokens.txt", "tokens.txt")
+    if run == 1:
+        parser = Parser(input)
+        parser.parse()
+    else:
+        compare(f"{dir}/syntax_errors.txt", "syntax_errors.txt")
+    # compare(f"{dir}/tokens.txt", "tokens.txt")

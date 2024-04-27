@@ -1,2 +1,0 @@
-12.	(out$, Invalid input) (put£, Invalid input) (2b, Invalid number) 
-25.	(aA$, Invalid input) (%, Invalid input) 
