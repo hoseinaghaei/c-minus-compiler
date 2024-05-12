@@ -1,5 +1,6 @@
 from anytree import Node, RenderTree
 
+import utils
 from grammar import Grammar
 from utils import NonTerminal, Terminal, TokenType
 from scanner import Scanner
@@ -12,7 +13,7 @@ class Parser(object):
         self.look_ahead = None
         self._next_token()
         self.syntax_error_file = open('syntax_errors.txt', 'w')
-        self.parse_tree_file = open('parse_tree.txt', 'w')
+        self.parse_tree_file = open('parse_tree.txt', 'w', encoding="utf-8")
         self.input_has_syntax_error = False
         self.current_non_terminal = self.grammar.statr_non_terminal
         self.root = Node(self.grammar.get_non_terminal_display_name(self.current_non_terminal))
@@ -23,6 +24,7 @@ class Parser(object):
         if self.look_ahead == Terminal.DOLLAR.value:
             if self.current_non_terminal != NonTerminal.Program:
                 self.syntax_error_file.write(f"#{self.scanner.lineno} : syntax error, Unexpected EOF")
+                utils.remove_node(self.current_node)
                 self.end_of_file_ok = False
             self._exit()
         token, token_type = self.scanner.get_next_token()
@@ -53,12 +55,13 @@ class Parser(object):
             return f"({self.look_ahead_type}, {self.look_ahead})"
 
     def _match(self, param):
+        node = Node(self.get_terminal_pair_to_show(), parent=self.current_node)
         if param == self.look_ahead:
-            Node(self.get_terminal_pair_to_show(), parent=self.current_node)
             self._next_token()
         else:
             self.input_has_syntax_error = True
             self.syntax_error_file.write(f"#{self.scanner.lineno} : syntax error, missing {param}\n")
+            utils.remove_node(node)
 
     def _do_parse(self, non_terminal: NonTerminal):
         self.current_non_terminal = non_terminal
@@ -96,6 +99,7 @@ class Parser(object):
             if is_look_ahead_in_follow:
                 non_terminal_name = self.grammar.get_non_terminal_display_name(non_terminal)
                 self.syntax_error_file.write(f"#{self.scanner.lineno} : syntax error, missing {non_terminal_name}\n")
+                utils.remove_node(self.current_node)
                 return
             else:
                 if self.look_ahead != Terminal.DOLLAR.value:

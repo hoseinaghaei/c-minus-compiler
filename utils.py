@@ -133,3 +133,8 @@ class SymbolTable(object):
             for item in self.items:
                 f.write(f"{item.id}.\t{item.lexeme}\n")
             f.close()
+
+
+def remove_node(node):
+    node.parent.children = [child for child in node.parent.children if child != node]
+    node.parent = None

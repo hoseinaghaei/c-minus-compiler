@@ -1,13 +1,14 @@
-
-from utils import Terminal
 # Hossein Aghaei - 98105619
 # Zahra Azar - 99109744
 
 
 from parser import Parser
 
-parser = Parser()
-parser.parse()
+
+if __name__ == "__main__":
+    parser = Parser()
+    parser.parse()
+
 # #
 # # get_next_token()
 #
