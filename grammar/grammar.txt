@@ -2,11 +2,11 @@ Program⟶ Declarationlist
 Declarationlist⟶ Declaration Declarationlist
 Declarationlist⟶ 
 Declaration⟶ Declarationinitial Declarationprime
-Declarationinitial⟶ Typespecifier ID
+Declarationinitial⟶ Typespecifier ID #assignzero
 Declarationprime⟶ Fundeclarationprime
 Declarationprime⟶ Vardeclarationprime
 Vardeclarationprime⟶ ;
-Vardeclarationprime⟶ [ NUM ] ;
+Vardeclarationprime⟶ [ NUM #pnum ] #declare_array;
 Fundeclarationprime⟶ ( Params ) Compoundstmt
 Typespecifier⟶ void
 Typespecifier⟶ int
@@ -36,12 +36,12 @@ Returnstmt⟶ return Returnstmtprime
 Returnstmtprime⟶ ;
 Returnstmtprime⟶ Expression ;
 Expression⟶ Simpleexpressionzegond
-Expression⟶ ID B
-B⟶ = Expression
+Expression⟶ ID #pid B
+B⟶ = Expression #assign
 B⟶ = [ Expression ] H
 B⟶ = Simpleexpressionprime
 H⟶ = Expression
-H⟶ = G D C
+H⟶ G D C
 Simpleexpressionzegond⟶ Additiveexpressionzegond C
 Simpleexpressionprime⟶ Additiveexpressionprime C
 C⟶ Relop Additiveexpression

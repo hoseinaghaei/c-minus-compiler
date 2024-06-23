@@ -1,5 +1,9 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from code_generator import CodeGenerator
 
 keywords = ['break', 'else', 'if', 'endif', 'int', 'for', 'return', 'void']
 
@@ -99,6 +103,31 @@ class Terminal(Enum):
     DOLLAR = '$'
 
 
+class ActionSymbol(Enum):
+    PID = "pid"
+    DECLAREID = "declare_id"
+    INITZERO = "init_zero"
+    PNUM = "pnum"
+    RETURN = "return"
+    BREAK = "break"
+    IFSAVE = "if_save"
+    STARTELSE = "start_else"
+    IFSAVEEND = "if_save_end"
+    ENDIF = "endif"
+    ENDIFAFTERELSE = "endif_after_else"
+    DECLAREFUNCTION = "declare_function"
+    POPPARAM = "pop_param"
+    OPENSCOPE = "open_scope"
+    FUNCOPENSCOPEFLAG = "func_open_scope_flag"
+    CLOSESCOP = "close_scope"
+    RETURNVALUE = "return_value"
+    ASSIGN = "assign"
+    ARRAYINDEX = "array_index"
+    EVALOPERATION = "eval_operation"
+    POPERAND = "poperand"
+    CALL = "call"
+
+
 class TokenType(Enum):
     NUM = "NUM"
     ID = "ID"
@@ -107,32 +136,67 @@ class TokenType(Enum):
     EOF = "$"
 
 
-@dataclass
 class SymbolTableItem:
-    id: int
-    lexeme: str
+    def __init__(self, lexeme: str, address=None, size=4):
+        self.type = type
+        self.lexeme = lexeme
+        self.address = address
+        self.size = size
+        self.param_count = None
+        self.param_symbols = []
+        self.is_initialized = False
+        self.is_function = False
+        self.is_array = False
 
 
 class SymbolTable(object):
-    def __init__(self):
-        self.items = []
-        self.ids = set()
-        self._initialize()
-
-    def _initialize(self):
-        for i, keyword in enumerate(keywords):
-            self.items.append(SymbolTableItem(id=i + 1, lexeme=keyword))
+    def __init__(self, code_generator: "CodeGenerator"):
+        self.code_generator = code_generator
+        self.scopes = [[]]
 
     def add_id_if_not_exist(self, lexeme):
-        if lexeme not in self.ids:
-            self.ids.add(lexeme)
-            self.items.append(SymbolTableItem(id=len(self.items) + 1, lexeme=lexeme))
+        for item in self.scopes[-1]:
+            if lexeme == item.lexeme:
+                return
+        self.scopes[-1].append(SymbolTableItem(lexeme=lexeme, address=self.code_generator.get_next_data_address()))
+
+    def find_symbol_address(self, lexeme):
+        return self.find_symbol(lexeme).address
+
+    def find_symbol(self, lexeme):
+        for scope in reversed(self.scopes):
+            for symbol in scope:
+                if symbol.lexeme == lexeme:
+                    return symbol
+
+    def find_symbol_by_address(self, address):
+        for scope in reversed(self.scopes):
+            for symbol in scope:
+                if symbol.address == address:
+                    return symbol
+
+    def get_last_symbol(self):
+        return self.scopes[-1][-1]
+
+    def add_new_scope(self):
+        self.scopes.append([])
+
+    def close_scope(self):
+        self.scopes.pop()
 
     def write(self):
-        with open('symbol_table.txt', 'w') as f:
-            for item in self.items:
-                f.write(f"{item.id}.\t{item.lexeme}\n")
-            f.close()
+        pass
+        # with open('symbol_table.txt', 'w') as f:
+        #     for item in self.items:
+        #         f.write(f"{item.id}.\t{item.lexeme}\n")
+        #     f.close()
+
+
+class TokenDTO:
+    def __init__(self, lineno=None, token_type=None, lexeme=None):
+        self.lineno = lineno
+        self.token_type = token_type
+        self.lexeme = lexeme
 
 
 def remove_node(node):

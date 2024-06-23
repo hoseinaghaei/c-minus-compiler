@@ -1,2 +1,0 @@
-#12 : syntax error, illegal break
-#15 : syntax error, illegal int

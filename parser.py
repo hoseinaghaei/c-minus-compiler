@@ -1,16 +1,20 @@
 from anytree import Node, RenderTree
 
 import utils
+from code_generator import CodeGenerator
 from grammar import Grammar
 from utils import NonTerminal, Terminal, TokenType
 from scanner import Scanner
 
 
 class Parser(object):
-    def __init__(self, file='input.txt'):
+    def __init__(self, code_generator: CodeGenerator, file='input.txt'):
         self.grammar = Grammar()
-        self.scanner = Scanner(file)
+        self.code_generator = code_generator
+        self.scanner = Scanner(self.code_generator.symbol_table)
         self.look_ahead = None
+        self.previous_token = None
+        self.current_token = None
         self._next_token()
         self.syntax_error_file = open('syntax_errors.txt', 'w')
         self.parse_tree_file = open('parse_tree.txt', 'w', encoding="utf-8")
@@ -27,9 +31,11 @@ class Parser(object):
                 utils.remove_node(self.current_node)
                 self.end_of_file_ok = False
             self._exit()
+        self.previous_token = self.current_token
         token, token_type = self.scanner.get_next_token()
         self.look_ahead = token
         self.look_ahead_type = token_type
+        self.current_token = utils.TokenDTO(token_type=token, lexeme=token_type)
 
     def _exit(self):
         if not self.input_has_syntax_error:
@@ -84,6 +90,8 @@ class Parser(object):
             for token in selected_rule:
                 if isinstance(token, Terminal):
                     self._match(token.value)
+                elif isinstance(token, utils.ActionSymbol):
+                    self.code_generator.act(token, self.previous_token)
                 else:
                     current_node = self.current_node
                     self.current_node = Node(self.grammar.get_non_terminal_display_name(token), parent=current_node)

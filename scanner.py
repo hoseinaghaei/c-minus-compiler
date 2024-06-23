@@ -69,11 +69,11 @@ class DFA:
 
 
 class Scanner(object):
-    def __init__(self, input_file='input.txt'):
+    def __init__(self, symbol_table: SymbolTable,  input_file='input.txt'):
         self.input_file = input_file
         self.file = open(input_file, 'r')
         self.dfa = DFA()
-        self.symbol_table = SymbolTable()
+        self.symbol_table = symbol_table
         self.token_file = open('tokens.txt', 'w')
         self.lexical_error_file = open('lexical_errors.txt', 'w')
         self.lineno = 1

@@ -1,2 +1,0 @@
-#7 : syntax error, missing Else-stmt
-#7 : syntax error, illegal endif

@@ -1,48 +1,48 @@
 Program -> Declaration-list
 Declaration-list -> Declaration Declaration-list | EPSILON
-Declaration -> Declaration-initial Declaration-prime
-Declaration-initial -> Type-specifier ID #assignzero
+Declaration -> Declaration-initial Declaration-prime #init_zero
+Declaration-initial -> Type-specifier ID #declare_id
 Declaration-prime -> Fun-declaration-prime | Var-declaration-prime
 Var-declaration-prime -> ; | [ NUM #pnum ] #declare_array ;
-Fun-declaration-prime -> ( Params ) Compound-stmt
+Fun-declaration-prime -> #declare_function ( #open_scope #func_open_scope_flag Params ) Compound-stmt #return
 Type-specifier -> int | void
-Params -> int ID Param-prime Param-list | void
+Params -> int ID Param-prime #pop_param Param-list | void
 Param-list -> , Param Param-list | EPSILON
 Param -> Declaration-initial Param-prime
 Param-prime -> [ ] | EPSILON
-Compound-stmt -> { Declaration-list Statement-list }
+Compound-stmt -> { #open_scope Declaration-list Statement-list #close_scope }
 Statement-list -> Statement Statement-list | EPSILON
 Statement -> Expression-stmt | Compound-stmt | Selection-stmt | Iteration-stmt | Return-stmt
-Expression-stmt -> Expression ; | break ; | ;
-Selection-stmt -> if ( Expression ) Statement Else-stmt
-Else-stmt -> endif | else Statement endif
-Iteration-stmt -> for (Expression; Expression; Expression) Statement
-Return-stmt -> return Return-stmt-prime
-Return-stmt-prime -> ; | Expression ;
+Expression-stmt -> Expression ; | break #break ; | ;
+Selection-stmt -> if ( Expression ) #if_save Statement Else-stmt
+Else-stmt -> endif #endif | else #start_else Statement endif
+Iteration-stmt -> for (Expression; Expression #save_for_cond; Expression) Statement #save_for
+Return-stmt -> return Return-stmt-prime #return
+Return-stmt-prime -> ; | Expression #return_value ;
 Expression -> Simple-expression-zegond | ID #pid B
-B -> = Expression #assign | [ Expression ] H | Simple-expression-prime
+B -> = Expression #assign | [ Expression #array_index ] H | Simple-expression-prime
 H -> = Expression | G D C
 Simple-expression-zegond -> Additive-expression-zegond C
 Simple-expression-prime -> Additive-expression-prime C
-C -> Relop Additive-expression | EPSILON
-Relop -> < | ==
+C -> Relop Additive-expression #eval_operation | EPSILON
+Relop -> < #poperand | == #poperand
 Additive-expression -> Term D
 Additive-expression-prime -> Term-prime D
 Additive-expression-zegond -> Term-zegond D
-D -> Addop Term D | EPSILON
-Addop -> + | -
+D -> Addop Term #eval_operation D | EPSILON
+Addop -> + #poperand | - #poperand
 Term -> Signed-factor G
 Term-prime -> Signed-factor-prime G
 Term-zegond -> Signed-factor-zegond G
-G -> * Signed-factor G | EPSILON
-Signed-factor -> + Factor | - Factor | Factor
+G -> * #poperand Signed-factor #eval_operation G | EPSILON
+Signed-factor -> + #poperand Factor | - #poperand Factor | Factor
 Signed-factor-prime -> Factor-prime
-Signed-factor-zegond -> + Factor | - Factor | Factor-zegond
-Factor -> ( Expression ) | ID Var-call-prime | NUM
-Var-call-prime -> ( Args ) | Var-prime
-Var-prime -> [ Expression ] | EPSILON
-Factor-prime -> ( Args ) | EPSILON
-Factor-zegond -> ( Expression ) | NUM
+Signed-factor-zegond -> + #poperand Factor #eval_operation | - #poperand Factor #eval_operation | Factor-zegond
+Factor -> ( Expression ) | ID #pid Var-call-prime | NUM #pnum
+Var-call-prime -> ( Args ) #call | Var-prime
+Var-prime -> [ Expression #array_index ] | EPSILON
+Factor-prime -> ( Args ) #call | EPSILON
+Factor-zegond -> ( Expression ) | NUM #pnum
 Args -> Arg-list | EPSILON
 Arg-list -> Expression Arg-list-prime
 Arg-list-prime -> , Expression Arg-list-prime | EPSILON
