@@ -7,8 +7,8 @@ Var-declaration-prime -> ; | [ NUM #pnum ] #declare_array ;
 Fun-declaration-prime -> #declare_function ( #open_scope #func_open_scope_flag Params ) Compound-stmt #return
 Type-specifier -> int | void
 Params -> int ID #declare_id Param-prime #pop_param Param-list | void
-Param-list -> , Param Param-list | EPSILON
-Param -> Declaration-initial Param-prime
+Param-list -> , Param  Param-list | EPSILON
+Param -> Declaration-initial #pid Param-prime #pop_param
 Param-prime -> [ ] | EPSILON
 Compound-stmt -> { #open_scope Declaration-list Statement-list #close_scope }
 Statement-list -> Statement Statement-list | EPSILON

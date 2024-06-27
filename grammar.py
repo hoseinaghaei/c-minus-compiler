@@ -17,7 +17,7 @@ class Grammar(object):
         ("Params", NonTerminal.Params,
          [[Terminal.VOID], [Terminal.INT, Terminal.ID, ActionSymbol.DECLAREID, ActionSymbol.PID, NonTerminal.Paramprime, ActionSymbol.POPPARAM, NonTerminal.Paramlist]]),
         ("Param-list", NonTerminal.Paramlist, [[NonTerminal.EPSILON], [Terminal.COMMA, NonTerminal.Param, NonTerminal.Paramlist]]),
-        ("Param", NonTerminal.Param, [[NonTerminal.Declarationinitial, NonTerminal.Paramprime]]),
+        ("Param", NonTerminal.Param, [[NonTerminal.Declarationinitial, ActionSymbol.PID, NonTerminal.Paramprime, ActionSymbol.POPPARAM]]),
         ("Param-prime", NonTerminal.Paramprime, [[NonTerminal.EPSILON], [Terminal.OPENBRACET, Terminal.CLOSEBRACET]]),
         ("Compound-stmt", NonTerminal.Compoundstmt,
          [[Terminal.OPENACOLAD, ActionSymbol.OPENSCOPE, NonTerminal.Declarationlist, NonTerminal.Statementlist, ActionSymbol.CLOSESCOP, Terminal.CLOSEACOLAD]]),
