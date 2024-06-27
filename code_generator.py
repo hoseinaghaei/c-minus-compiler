@@ -47,6 +47,8 @@ class CodeGenerator:
             ActionSymbol.START_ARGUMENT: self.action_manager.start_argument_list,
             ActionSymbol.ADD_ARGUMENT: self.action_manager.add_argument_count,
             ActionSymbol.END_ARGUMENT: self.action_manager.end_argument_count,
+            ActionSymbol.RETURNVALUE: self.action_manager.set_return_value,
+            ActionSymbol.POP: self.action_manager.pop,
             # ActionSymbol.ARRAYINDEX: self.action_manager.assign,
             # '#startArgumentList': self.action_manager.start_argument_list,
             # '#endArgumentList': self.action_manager.end_argument_list,

@@ -278,3 +278,6 @@ class ActionManager:
 
     def save_type(self, previous_token: TokenDTO, ):
         self.current_type = previous_token.lexeme
+
+    def pop(self, previous_token: TokenDTO):
+        self.code_generator.ss.pop()

@@ -129,6 +129,7 @@ class ActionSymbol(Enum):
     START_ARGUMENT = "start_argument"
     ADD_ARGUMENT = "add_argument"
     END_ARGUMENT = "end_argument"
+    POP = "pop"
 
 
 class TokenType(Enum):

@@ -15,7 +15,7 @@ class Grammar(object):
          [[ActionSymbol.DECLAREFUNCTION, Terminal.OPENPARENTHESIS, ActionSymbol.OPENSCOPE, ActionSymbol.FUNCOPENSCOPEFLAG, NonTerminal.Params, Terminal.CLOSEPARENTHESIS, NonTerminal.Compoundstmt, ActionSymbol.RETURN]]),
         ("Type-specifier", NonTerminal.Typespecifier, [[Terminal.VOID], [Terminal.INT]]),
         ("Params", NonTerminal.Params,
-         [[Terminal.VOID], [Terminal.INT, Terminal.ID, ActionSymbol.PID, NonTerminal.Paramprime, ActionSymbol.POPPARAM, NonTerminal.Paramlist]]),
+         [[Terminal.VOID], [Terminal.INT, Terminal.ID, ActionSymbol.DECLAREID, ActionSymbol.PID, NonTerminal.Paramprime, ActionSymbol.POPPARAM, NonTerminal.Paramlist]]),
         ("Param-list", NonTerminal.Paramlist, [[NonTerminal.EPSILON], [Terminal.COMMA, NonTerminal.Param, NonTerminal.Paramlist]]),
         ("Param", NonTerminal.Param, [[NonTerminal.Declarationinitial, NonTerminal.Paramprime]]),
         ("Param-prime", NonTerminal.Paramprime, [[NonTerminal.EPSILON], [Terminal.OPENBRACET, Terminal.CLOSEBRACET]]),
@@ -25,11 +25,11 @@ class Grammar(object):
         ("Statement", NonTerminal.Statement, [[NonTerminal.Expressionstmt], [NonTerminal.Compoundstmt], [NonTerminal.Selectionstmt],
                                  [NonTerminal.Iterationstmt], [NonTerminal.Returnstmt]]),
         ("Expression-stmt", NonTerminal.Expressionstmt,
-         [[Terminal.SEMICOLON], [Terminal.BREAK, ActionSymbol.BREAK, Terminal.SEMICOLON], [NonTerminal.Expression, Terminal.SEMICOLON]]),
+         [[Terminal.SEMICOLON], [Terminal.BREAK, ActionSymbol.BREAK, Terminal.SEMICOLON], [NonTerminal.Expression, ActionSymbol.POP, Terminal.SEMICOLON]]),
         ("Selection-stmt", NonTerminal.Selectionstmt, [
             [Terminal.IF, Terminal.OPENPARENTHESIS, NonTerminal.Expression, Terminal.CLOSEPARENTHESIS, ActionSymbol.IFSAVE,
              NonTerminal.Statement, NonTerminal.Elsestmt]]),
-        ("Else-stmt", NonTerminal.Elsestmt, [[Terminal.ENDIF, ActionSymbol.ENDIF], [Terminal.ELSE, ActionSymbol.STARTELSE, NonTerminal.Statement, Terminal.ENDIF]]),
+        ("Else-stmt", NonTerminal.Elsestmt, [[Terminal.ENDIF, ActionSymbol.ENDIF], [Terminal.ELSE, ActionSymbol.STARTELSE, NonTerminal.Statement, ActionSymbol.ENDIFAFTERELSE, Terminal.ENDIF]]),
         ("Iteration-stmt", NonTerminal.Iterationstmt, [
             [Terminal.FOR, Terminal.OPENPARENTHESIS, NonTerminal.Expression, Terminal.SEMICOLON, NonTerminal.Expression,
              Terminal.SEMICOLON, NonTerminal.Expression, Terminal.CLOSEPARENTHESIS, NonTerminal.Statement]]),

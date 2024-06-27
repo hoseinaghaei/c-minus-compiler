@@ -6,7 +6,7 @@ from parser import Parser
 
 if __name__ == "__main__":
     code_generator = CodeGenerator()
-    parser = Parser(code_generator, file='input_v2.txt')
+    parser = Parser(code_generator)
     parser.parse()
 
 # #
