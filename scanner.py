@@ -87,6 +87,7 @@ class Scanner(object):
         self.eof = False
         self.input_has_lexical_error = False
 
+    @staticmethod
     def _eval_token_type(self, token: str, state: STATE):
         if state == STATE.DIGIT:
             return TokenType.NUM.value, int(token)
@@ -94,7 +95,6 @@ class Scanner(object):
             if token in keywords:
                 return TokenType.KEYWORD.value, token
             else:
-                self.symbol_table.add_id_if_not_exist(token)
                 return TokenType.ID.value, token
 
         if state in [STATE.SYMBOL, STATE.EQUAL_EQUAL, STATE.EQUAL, STATE.STAR]:

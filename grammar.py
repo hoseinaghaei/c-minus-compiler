@@ -7,7 +7,7 @@ class Grammar(object):
         ("Program", NonTerminal.Program, [[NonTerminal.Declarationlist]]),
         ("Declaration-list", NonTerminal.Declarationlist, [[NonTerminal.Declaration, NonTerminal.Declarationlist, ActionSymbol.INITZERO], [NonTerminal.EPSILON]]),
         ("Declaration", NonTerminal.Declaration, [[NonTerminal.Declarationinitial, NonTerminal.Declarationprime]]),
-        ("Declaration-initial", NonTerminal.Declarationinitial, [[NonTerminal.Typespecifier, Terminal.ID, ActionSymbol.PID, ActionSymbol.DECLAREID]]),
+        ("Declaration-initial", NonTerminal.Declarationinitial, [[NonTerminal.Typespecifier, Terminal.ID, ActionSymbol.DECLAREID]]),
         ("Declaration-prime", NonTerminal.Declarationprime, [[NonTerminal.Fundeclarationprime], [NonTerminal.Vardeclarationprime]]),
         ("Var-declaration-prime", NonTerminal.Vardeclarationprime,
          [[Terminal.SEMICOLON], [Terminal.OPENBRACET, Terminal.NUM, Terminal.CLOSEBRACET, Terminal.SEMICOLON]]),
@@ -62,17 +62,17 @@ class Grammar(object):
         ("Factor", NonTerminal.Factor, [[Terminal.OPENPARENTHESIS, NonTerminal.Expression, Terminal.CLOSEPARENTHESIS],
                               [Terminal.ID, ActionSymbol.PID, NonTerminal.Varcallprime], [Terminal.NUM, ActionSymbol.PNUM]]),
         ("Var-call-prime", NonTerminal.Varcallprime,
-         [[NonTerminal.Varprime], [Terminal.OPENPARENTHESIS, NonTerminal.Args, Terminal.CLOSEPARENTHESIS, ActionSymbol.CALL]]),
+         [[NonTerminal.Varprime], [Terminal.OPENPARENTHESIS, ActionSymbol.START_ARGUMENT, NonTerminal.Args, ActionSymbol.END_ARGUMENT, Terminal.CLOSEPARENTHESIS, ActionSymbol.CALL]]),
         ("Var-prime", NonTerminal.Varprime,
          [[Terminal.OPENBRACET, NonTerminal.Expression, ActionSymbol.ARRAYINDEX, Terminal.CLOSEBRACET], [NonTerminal.EPSILON]]),
         ("Factor-prime", NonTerminal.Factorprime,
-         [[Terminal.OPENPARENTHESIS, NonTerminal.Args, Terminal.CLOSEPARENTHESIS], [NonTerminal.EPSILON]]),
+         [[Terminal.OPENPARENTHESIS, ActionSymbol.START_ARGUMENT, NonTerminal.Args, ActionSymbol.END_ARGUMENT, Terminal.CLOSEPARENTHESIS, ActionSymbol.CALL], [NonTerminal.EPSILON]]),
         ("Factor-zegond", NonTerminal.Factorzegond,
-         [[Terminal.OPENPARENTHESIS, NonTerminal.Expression, Terminal.CLOSEPARENTHESIS, ActionSymbol.CALL], [Terminal.NUM, ActionSymbol.PNUM]]),
+         [[Terminal.OPENPARENTHESIS, NonTerminal.Expression, Terminal.CLOSEPARENTHESIS], [Terminal.NUM, ActionSymbol.PNUM]]),
         ("Args", NonTerminal.Args, [[NonTerminal.Arglist], [NonTerminal.EPSILON]]),
-        ("Arg-list", NonTerminal.Arglist, [[NonTerminal.Expression, NonTerminal.Arglistprime]]),
+        ("Arg-list", NonTerminal.Arglist, [[NonTerminal.Expression, ActionSymbol.ADD_ARGUMENT, NonTerminal.Arglistprime]]),
         ("Arg-list-prime", NonTerminal.Arglistprime,
-         [[Terminal.COMMA, NonTerminal.Expression, NonTerminal.Arglistprime], [NonTerminal.EPSILON]])
+         [[Terminal.COMMA, NonTerminal.Expression, ActionSymbol.ADD_ARGUMENT, NonTerminal.Arglistprime], [NonTerminal.EPSILON]])
     ]
 
     firsts = {

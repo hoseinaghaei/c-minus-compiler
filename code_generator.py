@@ -19,7 +19,6 @@ class CodeGenerator:
         self.function_temp_start_pointer = 0
 
         self.program = Program()
-        self.main_address = 0
 
         self.symbol_table = SymbolTable(self)
         self.register_file = RegisterFile(self)
@@ -45,6 +44,9 @@ class CodeGenerator:
             ActionSymbol.CALL: self.action_manager.call,
             ActionSymbol.RETURN: self.action_manager.return_back,
             ActionSymbol.ASSIGN: self.action_manager.assign,
+            ActionSymbol.START_ARGUMENT: self.action_manager.start_argument_list,
+            ActionSymbol.ADD_ARGUMENT: self.action_manager.add_argument_count,
+            ActionSymbol.END_ARGUMENT: self.action_manager.end_argument_count,
             # ActionSymbol.ARRAYINDEX: self.action_manager.assign,
             # '#startArgumentList': self.action_manager.start_argument_list,
             # '#endArgumentList': self.action_manager.end_argument_list,
@@ -82,16 +84,12 @@ class CodeGenerator:
             # '#endRHS': self.action_manager.end_rhs,
         }
 
-        # initialization_instructions = [
-        #     Assign(f"#{STACK_START_ADDRESS}", self.register_file.stack_pointer_register_address),
-        #     Assign("#0", self.register_file.return_address_register_address),
-        #     Assign("#0", self.register_file.return_value_register_address),
-        # ]
-        #
-        # self.push_instructions(initialization_instructions)
+        self.add_code(f"(ASSIGN, #{self.temp_address}, {self.register_file.stack_pointer_register_address}, )")
+        self.add_code(f"(ASSIGN, #0, {self.register_file.return_address_register_address}, )")
+        self.add_code(f"(ASSIGN, #0, {self.register_file.return_value_register_address}, )")
 
-        # self.i += 1
-
+        self.main_address = self.get_current_code_stack_head()
+        self.move_code_stack_head()
         self.add_output_function()
 
 
@@ -109,7 +107,7 @@ class CodeGenerator:
 
 
     def move_code_stack_head(self):
-        self.program.increase_size(len(self.program.codes) + 1)
+        self.program.increase_size(len(self.program.codes))
 
 
     def get_current_code_stack_head(self):

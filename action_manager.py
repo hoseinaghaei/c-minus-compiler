@@ -19,7 +19,6 @@ class ActionManager:
         self.function_scope_has_opened = False
         self.breaks = []
         self.has_reached_main = False
-        self.force_declaration_flag = False
         self.current_id = ""
         self.void_flag = False
 
@@ -32,11 +31,12 @@ class ActionManager:
 
     def declare_id(self, previous_token: TokenDTO):
         self.current_id = previous_token.lexeme
+        self.symbol_table.add_id_if_not_exist(lexeme=self.current_id)
         self.check_if_its_main(previous_token)
 
     def check_if_its_main(self, previous_token):
         if previous_token.lexeme == 'main':
-            code = f"(JP, #{self.code_generator.get_current_code_stack_head()}, , )"
+            code = f"(JP, {self.code_generator.get_current_code_stack_head()}, , )"
             self.code_generator.add_main_address(code)
             if not self.has_reached_main:
                 self._initialize_global_variable()
@@ -44,8 +44,9 @@ class ActionManager:
 
     def _initialize_global_variable(self):
         for symbol in self.code_generator.symbol_table.scopes[0]:
-            if not symbol.is_function:
-                self.code_generator.add_code(f"(ASSIGN, #0, {symbol.address}), ")
+            if not symbol.is_function and symbol.lexeme != 'main':  # todo: fix
+                self.code_generator.add_code(f"(ASSIGN, #0, {symbol.address}, )")
+                # self.code_generator.add_code(f"(ASSIGN, #0, {symbol.address}, {symbol.lexeme})")
 
     def pnum(self, previous_token: TokenDTO):
         self.code_generator.ss.append(f"#{previous_token.lexeme}")
@@ -68,8 +69,8 @@ class ActionManager:
         temp_address = self.code_generator.get_next_temp_address()
         self.code_generator.ss.append(temp_address)
         operation_to_func_name = {
-            '+': 'Add',
-            '-': 'Sub',
+            '+': 'ADD',
+            '-': 'SUB',
             '<': 'LT',
             '==': 'EQ',
             '*': 'MULT',
@@ -106,6 +107,7 @@ class ActionManager:
     def assign(self, previous_token: TokenDTO):
         value = self.code_generator.ss.pop()
         address = self.code_generator.ss.pop()
+        # code = f"(ASSIGN, {value}, {address}, {self.symbol_table.find_symbol_by_address(address).lexeme})"
         code = f"(ASSIGN, {value}, {address}, )"
         self.code_generator.add_code(code)
         self.code_generator.ss.append(value)  # todo: why?
@@ -154,10 +156,10 @@ class ActionManager:
     def pop(self, previous_token: TokenDTO):
         self.code_generator.ss.pop()
 
-    def check_declaration(self, previous_token: TokenDTO,  ):
+    def check_declaration(self, previous_token: TokenDTO, ):
         self.check_declaration_flag = True
 
-    def uncheck_declaration(self, previous_token: TokenDTO,  ):
+    def uncheck_declaration(self, previous_token: TokenDTO, ):
         self.check_declaration_flag = False
 
     def set_function_scope_flag(self, previous_token: TokenDTO):
@@ -248,17 +250,21 @@ class ActionManager:
 
     def return_back(self, previous_token: TokenDTO):
         if not self.has_reached_main:
-            code = f"(JP, {self.code_generator.register_file.return_address_register_address}, , )"
+            code = f"(JP, @{self.code_generator.register_file.return_address_register_address}, , )"
             self.code_generator.add_code(code)
 
-    # def add_argument_count(self, previous_token: TokenDTO,  ):
-    #     self.found_arg_type_mismtach[-1] = False
-    #     self.argument_counts[-1] += 1
+    def add_argument_count(self, previous_token: TokenDTO):
+        self.argument_counts[-1] += 1
+
+    def end_argument_count(self, previous_token: TokenDTO):
+        pass
+        # self.argument_counts[-1] += 1
 
     def init_zero(self, previous_token: TokenDTO):
         if len(self.code_generator.symbol_table.scopes) > 1:
             symbol = self.code_generator.symbol_table.scopes[-1][-1]
-            code = f"(ASSIGN, {symbol.address}, #0, )"
+            # code = f"(ASSIGN, {symbol.address}, #0, {symbol.lexeme})"
+            code = f"(ASSIGN, #0, {symbol.address}, )"
             self.code_generator.add_code(code)
 
     # def array_param(self, previous_token: TokenDTO,  ):
@@ -266,14 +272,9 @@ class ActionManager:
     #     symbol.is_array = True
     #     symbol.symbol_type = ARRAY
 
-    def set_force_declaration_flag(self, previous_token: TokenDTO):
-        self.force_declaration_flag = True
 
-    def unset_force_declaration_flag(self, previous_token: TokenDTO):
-        self.force_declaration_flag = False
-
-    def void_check(self, previous_token: TokenDTO,  ):
+    def void_check(self, previous_token: TokenDTO, ):
         self.void_flag = True
 
-    def save_type(self, previous_token: TokenDTO,  ):
+    def save_type(self, previous_token: TokenDTO, ):
         self.current_type = previous_token.lexeme

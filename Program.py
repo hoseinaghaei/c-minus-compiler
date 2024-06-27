@@ -1,6 +1,6 @@
 class Program(object):
     def __init__(self):
-        self.codes = ['']
+        self.codes = []
 
     def add_code(self, code: str, address: int = None):
         if address is None:

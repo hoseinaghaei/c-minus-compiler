@@ -17,7 +17,5 @@ class RuntimeStack:
         self.code_generator.add_code(code)
 
     def pop(self, address):
-        code = f"(ASSIGN, @{self.register_file.stack_pointer_register_address}, {address}, )"
-        self.code_generator.add_code(code)
-        code = f"(ADD, {self.register_file.stack_pointer_register_address}, #4, {self.register_file.stack_pointer_register_address})"
-        self.code_generator.add_code(code)
+        self.code_generator.add_code(f"(ASSIGN, @{self.register_file.stack_pointer_register_address}, {address}, )")
+        self.code_generator.add_code(f"(ADD, {self.register_file.stack_pointer_register_address}, #4, {self.register_file.stack_pointer_register_address})")

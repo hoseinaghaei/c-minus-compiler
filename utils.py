@@ -126,6 +126,9 @@ class ActionSymbol(Enum):
     EVALOPERATION = "eval_operation"
     POPERAND = "poperand"
     CALL = "call"
+    START_ARGUMENT = "start_argument"
+    ADD_ARGUMENT = "add_argument"
+    END_ARGUMENT = "end_argument"
 
 
 class TokenType(Enum):

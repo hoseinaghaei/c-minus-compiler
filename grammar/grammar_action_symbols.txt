@@ -39,10 +39,10 @@ Signed-factor -> + #poperand Factor | - #poperand Factor | Factor
 Signed-factor-prime -> Factor-prime
 Signed-factor-zegond -> + #poperand Factor #eval_operation | - #poperand Factor #eval_operation | Factor-zegond
 Factor -> ( Expression ) | ID #pid Var-call-prime | NUM #pnum
-Var-call-prime -> ( Args ) #call | Var-prime
+Var-call-prime -> ( #start_argument Args #end_argument) #call | Var-prime
 Var-prime -> [ Expression #array_index ] | EPSILON
-Factor-prime -> ( Args ) #call | EPSILON
+Factor-prime -> ( #start_argument Args #end_argument) #call | EPSILON
 Factor-zegond -> ( Expression ) | NUM #pnum
 Args -> Arg-list | EPSILON
-Arg-list -> Expression Arg-list-prime
-Arg-list-prime -> , Expression Arg-list-prime | EPSILON
+Arg-list -> Expression #add_argument Arg-list-prime
+Arg-list-prime -> , Expression #add_argument Arg-list-prime | EPSILON
