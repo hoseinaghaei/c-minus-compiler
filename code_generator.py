@@ -49,7 +49,9 @@ class CodeGenerator:
             ActionSymbol.END_ARGUMENT: self.action_manager.end_argument_count,
             ActionSymbol.RETURNVALUE: self.action_manager.set_return_value,
             ActionSymbol.POP: self.action_manager.pop,
-            # ActionSymbol.ARRAYINDEX: self.action_manager.assign,
+            ActionSymbol.DECLARE_ARRAY: self.action_manager.declare_array,
+            ActionSymbol.ARRAY_PARAM: self.action_manager.array_param,
+            ActionSymbol.ARRAYINDEX: self.action_manager.array_index,
             # '#startArgumentList': self.action_manager.start_argument_list,
             # '#endArgumentList': self.action_manager.end_argument_list,
             # '#jpfFromSaved': self.action_manager.jpf_from_saved,
@@ -120,9 +122,9 @@ class CodeGenerator:
         self.program.add_code(code, self.main_address)
 
 
-    def get_next_data_address(self):
+    def get_next_data_address(self, size=4):
         address = self.data_address
-        self.data_address += 4
+        self.data_address += size
         return address
 
 

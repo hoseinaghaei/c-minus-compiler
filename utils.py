@@ -130,6 +130,8 @@ class ActionSymbol(Enum):
     ADD_ARGUMENT = "add_argument"
     END_ARGUMENT = "end_argument"
     POP = "pop"
+    ARRAY_PARAM = "array_param"
+    DECLARE_ARRAY = "declare_array"
 
 
 class TokenType(Enum):
