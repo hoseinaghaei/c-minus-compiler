@@ -16,7 +16,7 @@ Statement -> Expression-stmt | Compound-stmt | Selection-stmt | Iteration-stmt |
 Expression-stmt -> Expression #pop ; | break #break ; | ;
 Selection-stmt -> if ( Expression ) #if_save Statement Else-stmt
 Else-stmt -> endif #endif | else #start_else Statement endif #endif_after_else
-Iteration-stmt -> for (Expression; Expression #save_for_cond; Expression) Statement #save_for
+Iteration-stmt -> for #debug (Expression; #for_check_condition Expression #if_save #if_save; Expression #for_jump_check_condition) #break_scope Statement #save_for #save_break
 Return-stmt -> return Return-stmt-prime #return
 Return-stmt-prime -> ; | Expression #return_value ;
 Expression -> Simple-expression-zegond | ID #pid B

@@ -156,6 +156,52 @@ class ActionManager:
     def pop(self, previous_token: TokenDTO):
         self.code_generator.ss.pop()
 
+    def for_check_condition(self, previous_token: TokenDTO):
+        self.code_generator.ss.append(f"#{self.code_generator.get_current_code_stack_head()}")
+
+    def for_jump_check_condition(self, previous_token: TokenDTO):
+        self.code_generator.add_code(f"(JP, {self.code_generator.ss[-5]}, , )")
+        self.code_generator.add_code(f"(JP, {self.code_generator.get_current_code_stack_head()}, , )", self.code_generator.ss[-2])
+        self.code_generator.add_code(f"(ASSIGN, #0, {self.code_generator.temp_address - 4}, )")
+
+    def for_save(self, previous_token: TokenDTO):
+        cond_result = self.code_generator.ss.pop()
+        jp_index = self.code_generator.ss.pop()
+        check_saved_index = self.code_generator.ss.pop()
+        check_result = self.code_generator.ss.pop()
+        check_statement_index = self.code_generator.ss.pop()
+        check_statement_index = self.code_generator.ss.pop()
+
+        jpf_code = f"(JPF, {check_result}, #{self.code_generator.get_current_code_stack_head() + 1}, )"
+        self.code_generator.add_code(jpf_code, check_saved_index)
+
+
+        add = str(jp_index)
+        if add[0] == '#':
+            add = int(add[1:])
+        else:
+            add = int(add)
+        jp_code = f"(JP, {str(add + 1)}, , )"
+        self.code_generator.add_code(jp_code)
+
+
+    def break_scope(self, previous_token: TokenDTO):
+        self.breaks.append([])
+
+    def break_key(self, previous_token: TokenDTO):
+        self.breaks[-1].append(self.code_generator.get_current_code_stack_head())
+        self.code_generator.move_code_stack_head()
+
+    def break_save(self, previous_token: TokenDTO):
+        for i in self.breaks[-1]:
+            self.code_generator.add_code(f"(JP, {self.code_generator.get_current_code_stack_head()}, , )", i)
+
+        self.breaks.pop()
+
+
+    def debug(self, previous_token: TokenDTO):
+        print(self.code_generator.get_current_code_stack_head())
+
     def check_declaration(self, previous_token: TokenDTO, ):
         self.check_declaration_flag = True
 

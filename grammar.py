@@ -31,8 +31,8 @@ class Grammar(object):
              NonTerminal.Statement, NonTerminal.Elsestmt]]),
         ("Else-stmt", NonTerminal.Elsestmt, [[Terminal.ENDIF, ActionSymbol.ENDIF], [Terminal.ELSE, ActionSymbol.STARTELSE, NonTerminal.Statement, ActionSymbol.ENDIFAFTERELSE, Terminal.ENDIF]]),
         ("Iteration-stmt", NonTerminal.Iterationstmt, [
-            [Terminal.FOR, Terminal.OPENPARENTHESIS, NonTerminal.Expression, Terminal.SEMICOLON, NonTerminal.Expression,
-             Terminal.SEMICOLON, NonTerminal.Expression, Terminal.CLOSEPARENTHESIS, NonTerminal.Statement]]),
+            [Terminal.FOR, ActionSymbol.DEBUG, Terminal.OPENPARENTHESIS, NonTerminal.Expression, ActionSymbol.FORCHECKCONDITION, Terminal.SEMICOLON, NonTerminal.Expression, ActionSymbol.IFSAVE, ActionSymbol.IFSAVE,
+             Terminal.SEMICOLON, NonTerminal.Expression, ActionSymbol.FORJUMPCHECKCONDITION, Terminal.CLOSEPARENTHESIS, ActionSymbol.BREAKSCOPE, NonTerminal.Statement, ActionSymbol.FORSAVE, ActionSymbol.BREAKSAVE]]),
         ("Return-stmt", NonTerminal.Returnstmt, [[Terminal.RETURN, NonTerminal.Returnstmtprime, ActionSymbol.RETURN]]),
         ("Return-stmt-prime", NonTerminal.Returnstmtprime, [[Terminal.SEMICOLON], [NonTerminal.Expression, ActionSymbol.RETURNVALUE, Terminal.SEMICOLON]]),
         ("Expression", NonTerminal.Expression, [[NonTerminal.Simpleexpressionzegond], [Terminal.ID, ActionSymbol.PID, NonTerminal.B]]),

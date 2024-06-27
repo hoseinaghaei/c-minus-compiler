@@ -110,6 +110,8 @@ class ActionSymbol(Enum):
     PNUM = "pnum"
     RETURN = "return"
     BREAK = "break"
+    BREAKSCOPE = "break_scope"
+    BREAKSAVE = "save_break"
     IFSAVE = "if_save"
     STARTELSE = "start_else"
     IFSAVEEND = "if_save_end"
@@ -130,6 +132,10 @@ class ActionSymbol(Enum):
     ADD_ARGUMENT = "add_argument"
     END_ARGUMENT = "end_argument"
     POP = "pop"
+    FORCHECKCONDITION = "for_check_condition"
+    FORJUMPCHECKCONDITION = "for_jump_check_condition"
+    FORSAVE = "save_for"
+    DEBUG = "debug"
 
 
 class TokenType(Enum):
