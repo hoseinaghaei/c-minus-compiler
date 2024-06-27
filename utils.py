@@ -136,6 +136,8 @@ class ActionSymbol(Enum):
     FORJUMPCHECKCONDITION = "for_jump_check_condition"
     FORSAVE = "save_for"
     DEBUG = "debug"
+    ARRAY_PARAM = "array_param"
+    DECLARE_ARRAY = "declare_array"
 
 
 class TokenType(Enum):

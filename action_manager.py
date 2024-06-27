@@ -115,31 +115,27 @@ class ActionManager:
         if symbol:
             symbol.is_initialized = True
 
-    # def declare_array(self, previous_token: TokenDTO,  ):
-    #     # use [1:] to skip the '#'
-    #     length = int(self.code_generator.ss.pop()[1:])
-    #     symbol: Symbol = self.code_generator.symbol_table.scopes[-1][-1]
-    #     symbol.is_array = True
-    #     symbol.symbol_type = ARRAY
-    #     size = length * WORD_SIZE
-    #     array_start_address = self.code_generator.get_next_data_address(size=size)
-    #     self.code_generator.push_instruction(Assign(f"#{array_start_address}", symbol.address))
-    #     if len(self.code_generator.symbol_table.scopes) > 1:
-    #         for address in range(array_start_address, array_start_address + size, WORD_SIZE):
-    #             self.code_generator.push_instruction(
-    #                 Assign("#0", address))
+    def declare_array(self, previous_token: TokenDTO):
+        length = int(self.code_generator.ss.pop()[1:])
+        symbol = self.code_generator.symbol_table.scopes[-1][-1]
+        symbol.is_array = True
+        size = length * 4
+        array_start_address = self.code_generator.get_next_data_address(size=size)
+        code = f"(ASSIGN, #{array_start_address}, {symbol.address}, )"
+        self.code_generator.add_code(code)
+        if len(self.code_generator.symbol_table.scopes) > 1:
+            for address in range(array_start_address, array_start_address + size, 4):
+                code = f"(ASSIGN, #0, {address}, )"
+                self.code_generator.add_code(code)
 
-    # def array(self, previous_token: TokenDTO):
-    #     offset = self.code_generator.ss.pop()
-    #     temp = self.code_generator.get_next_temp_address()
-    #     array_start = self.code_generator.ss.pop()
-    #     instructions = [
-    #         Mult(offset, f"#{WORD_SIZE}", temp),
-    #         Add(temp, f"{array_start}", temp),
-    #     ]
-    #     self.code_generator.push_codes(instructions)
-    #     self.code_generator.ss.append(f"@{temp}")
-    #
+    def array_index(self, previous_token: TokenDTO):
+        offset = self.code_generator.ss.pop()
+        temp = self.code_generator.get_next_temp_address()
+        array_start = self.code_generator.ss.pop()
+        self.code_generator.add_code(f"(MULT, {offset}, #4, {temp})")
+        self.code_generator.add_code(f"(ADD, {temp}, {array_start}, {temp})")
+        self.code_generator.ss.append(f"@{temp}")
+
     # def start_break_scope(self, previous_token: TokenDTO):
     #     self.breaks.append([])
     #
@@ -313,10 +309,10 @@ class ActionManager:
             code = f"(ASSIGN, #0, {symbol.address}, )"
             self.code_generator.add_code(code)
 
-    # def array_param(self, previous_token: TokenDTO,  ):
-    #     symbol: Symbol = self.code_generator.symbol_table.scopes[-1][-1]
-    #     symbol.is_array = True
-    #     symbol.symbol_type = ARRAY
+    def array_param(self, previous_token: TokenDTO):
+        symbol = self.code_generator.symbol_table.scopes[-1][-1]
+        symbol.is_array = True
+        # symbol.symbol_type = ARRAY
 
 
     def void_check(self, previous_token: TokenDTO, ):

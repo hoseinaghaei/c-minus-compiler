@@ -87,7 +87,8 @@ class Scanner(object):
         self.eof = False
         self.input_has_lexical_error = False
 
-    def _eval_token_type(self, token: str, state: STATE):
+    @staticmethod
+    def _eval_token_type(token: str, state: STATE):
         if state == STATE.DIGIT:
             return TokenType.NUM.value, int(token)
         if state == STATE.LETTER_DIGIT:

@@ -49,6 +49,9 @@ class CodeGenerator:
             ActionSymbol.END_ARGUMENT: self.action_manager.end_argument_count,
             ActionSymbol.RETURNVALUE: self.action_manager.set_return_value,
             ActionSymbol.POP: self.action_manager.pop,
+            ActionSymbol.DECLARE_ARRAY: self.action_manager.declare_array,
+            ActionSymbol.ARRAY_PARAM: self.action_manager.array_param,
+            ActionSymbol.ARRAYINDEX: self.action_manager.array_index,
             ActionSymbol.FORCHECKCONDITION: self.action_manager.for_check_condition,
             ActionSymbol.FORJUMPCHECKCONDITION: self.action_manager.for_jump_check_condition,
             ActionSymbol.FORSAVE: self.action_manager.for_save,
@@ -92,9 +95,9 @@ class CodeGenerator:
         self.program.add_code(code, self.main_address)
 
 
-    def get_next_data_address(self):
+    def get_next_data_address(self, size=4):
         address = self.data_address
-        self.data_address += 4
+        self.data_address += size
         return address
 
 
