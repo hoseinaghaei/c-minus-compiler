@@ -11,3 +11,9 @@ class Program(object):
     def increase_size(self, new_size: int):
         while len(self.codes) <= new_size:
             self.codes.append('')
+
+    def generate_output_file(self):
+        output_file = open('output.txt', 'w')
+        for lineno in range(len(self.codes)):
+            output_file.write(f"{lineno}\t{self.codes[lineno]}\n")
+        output_file.close()

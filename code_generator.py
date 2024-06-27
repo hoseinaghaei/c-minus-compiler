@@ -146,3 +146,6 @@ class CodeGenerator:
         self.add_code(f"(PRINT, {self.ss.pop()}, , )")
         self.act(ActionSymbol.CLOSESCOP, None)
         self.act(ActionSymbol.RETURN, None)
+
+    def generate_output(self):
+        self.program.generate_output_file()

@@ -117,4 +117,5 @@ class Parser(object):
 
     def parse(self):
         self._do_parse(self.grammar.statr_non_terminal)
+        self.code_generator.generate_output()
         self._exit()

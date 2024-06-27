@@ -58,9 +58,9 @@ class ActionManager:
         self.code_generator.move_code_stack_head()
 
     def push_operation(self, previous_token: TokenDTO):
-        self.code_generator.ss.append(previous_token.lexeme)
+        self.code_generator.ss.append(previous_token.token_type)
 
-    def eval_operation(self):
+    def eval_operation(self, previous_token: TokenDTO):
         operand2 = self.code_generator.ss.pop()
         operation = self.code_generator.ss.pop()
         operand1 = self.code_generator.ss.pop()
@@ -72,7 +72,7 @@ class ActionManager:
             '-': 'Sub',
             '<': 'LT',
             '==': 'EQ',
-            '*': 'Mult',
+            '*': 'MULT',
         }
         code = f"({operation_to_func_name[operation]}, {operand1}, {operand2}, {temp_address})"
         self.code_generator.add_code(code)
