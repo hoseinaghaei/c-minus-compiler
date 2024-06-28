@@ -55,7 +55,7 @@ class Parser(object):
         if self.look_ahead == Terminal.DOLLAR.value:
             return self.look_ahead
 
-        if self.look_ahead in  [TokenType.ID.value, TokenType.NUM.value]:
+        if self.look_ahead in [TokenType.ID.value, TokenType.NUM.value]:
             return f"({self.look_ahead}, {self.look_ahead_type})"
         else:
             return f"({self.look_ahead_type}, {self.look_ahead})"
@@ -91,7 +91,7 @@ class Parser(object):
                 if isinstance(token, Terminal):
                     self._match(token.value)
                 elif isinstance(token, utils.ActionSymbol):
-                    self.code_generator.act(token, self.previous_token)
+                    self.code_generator.handle_action_symbol(token, self.previous_token)
                 else:
                     current_node = self.current_node
                     self.current_node = Node(self.grammar.get_non_terminal_display_name(token), parent=current_node)

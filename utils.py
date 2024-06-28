@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING
 
@@ -105,36 +104,36 @@ class Terminal(Enum):
 
 class ActionSymbol(Enum):
     PID = "pid"
-    DECLAREID = "declare_id"
-    INITZERO = "init_zero"
+    DECLARE_ID = "declare_id"
+    INIT_ZERO = "init_zero"
     PNUM = "pnum"
     RETURN = "return"
     BREAK = "break"
-    BREAKSCOPE = "break_scope"
-    BREAKSAVE = "save_break"
-    IFSAVE = "if_save"
-    STARTELSE = "start_else"
-    IFSAVEEND = "if_save_end"
+    BREAK_SCOPE = "break_scope"
+    BREAK_SAVE = "save_break"
+    IF_SAVE = "if_save"
+    START_ELSE = "start_else"
+    IF_SAVE_END = "if_save_end"
     ENDIF = "endif"
-    ENDIFAFTERELSE = "endif_after_else"
-    DECLAREFUNCTION = "declare_function"
-    POPPARAM = "pop_param"
-    OPENSCOPE = "open_scope"
-    FUNCOPENSCOPEFLAG = "func_open_scope_flag"
-    CLOSESCOP = "close_scope"
-    RETURNVALUE = "return_value"
+    ENDIF_AFTER_ELSE = "endif_after_else"
+    DECLARE_FUNCTION = "declare_function"
+    ADD_PARAM = "add_param"
+    START_SCOPE = "start_scope"
+    START_SCOPE_FLAG = "start_scope_flag"
+    END_SCOPE = "end_scope"
+    RETURN_VALUE = "return_value"
     ASSIGN = "assign"
-    ARRAYINDEX = "array_index"
-    EVALOPERATION = "eval_operation"
-    POPERAND = "poperand"
+    ARRAY_INDEX = "array_index"
+    EVAL_OPERATION = "eval_operation"
+    POPERATION = "poperand"
     CALL = "call"
-    START_ARGUMENT = "start_argument"
-    ADD_ARGUMENT = "add_argument"
-    END_ARGUMENT = "end_argument"
+    START_ARGS = "start_argument"
+    ADD_ARG = "add_argument"
+    END_ARGS = "end_argument"
     POP = "pop"
-    FORCHECKCONDITION = "for_check_condition"
-    FORJUMPCHECKCONDITION = "for_jump_check_condition"
-    FORSAVE = "save_for"
+    FOR_CHECK_CONDITION = "for_check_condition"
+    FOR_JUMP_CHECK_CONDITION = "for_jump_check_condition"
+    FOR_SAVE = "save_for"
     DEBUG = "debug"
     ARRAY_PARAM = "array_param"
     DECLARE_ARRAY = "declare_array"
@@ -151,7 +150,6 @@ class TokenType(Enum):
 
 class SymbolTableItem:
     def __init__(self, lexeme: str, address=None, size=4):
-        self.type = type
         self.lexeme = lexeme
         self.address = address
         self.size = size
@@ -171,10 +169,7 @@ class SymbolTable(object):
         for item in self.scopes[-1]:
             if lexeme == item.lexeme:
                 return
-        self.scopes[-1].append(SymbolTableItem(lexeme=lexeme, address=self.code_generator.get_next_data_address()))
-
-    def find_symbol_address(self, lexeme):
-        return self.find_symbol(lexeme).address
+        self.scopes[-1].append(SymbolTableItem(lexeme=lexeme, address=self.code_generator.get_data_address()))
 
     def find_symbol(self, lexeme):
         for scope in reversed(self.scopes):
@@ -196,13 +191,6 @@ class SymbolTable(object):
 
     def close_scope(self):
         self.scopes.pop()
-
-    def write(self):
-        pass
-        # with open('symbol_table.txt', 'w') as f:
-        #     for item in self.items:
-        #         f.write(f"{item.id}.\t{item.lexeme}\n")
-        #     f.close()
 
 
 class TokenDTO:

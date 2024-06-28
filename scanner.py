@@ -205,7 +205,6 @@ class Scanner(object):
             self.token_file.write(token_tuple + ' ')
             self.previous_token = token_identified
         else:
-            self.symbol_table.write()
             if not self.input_has_lexical_error:
                 self.lexical_error_file.write("There is no lexical error.")
             self.token_file.close()

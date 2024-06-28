@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 from utils import SymbolTable, TokenDTO, SymbolTableItem
 
 
-class ActionManager:
+class ActionHandler:
     def __init__(self, code_generator: "CodeGenerator", symbol_table: SymbolTable):
         self.code_generator = code_generator
         self.symbol_table = symbol_table
@@ -26,7 +26,7 @@ class ActionManager:
         self.current_id = previous_token.lexeme
         self.check_if_its_main(previous_token)
         if not self.no_push_flag:
-            address = self.symbol_table.find_symbol_address(previous_token.lexeme)
+            address = self.symbol_table.find_symbol(previous_token.lexeme).address
             self.code_generator.ss.append(address)
 
     def declare_id(self, previous_token: TokenDTO):
@@ -58,7 +58,7 @@ class ActionManager:
         self.code_generator.ss.append(f"#{self.code_generator.get_current_code_stack_head()}")
         self.code_generator.move_code_stack_head()
 
-    def push_operation(self, previous_token: TokenDTO):
+    def poperation(self, previous_token: TokenDTO):
         self.code_generator.ss.append(previous_token.token_type)
 
     def eval_operation(self, previous_token: TokenDTO):
@@ -66,7 +66,7 @@ class ActionManager:
         operation = self.code_generator.ss.pop()
         operand1 = self.code_generator.ss.pop()
 
-        temp_address = self.code_generator.get_next_temp_address()
+        temp_address = self.code_generator.get_temp_address()
         self.code_generator.ss.append(temp_address)
         operation_to_func_name = {
             '+': 'ADD',
@@ -78,7 +78,7 @@ class ActionManager:
         code = f"({operation_to_func_name[operation]}, {operand1}, {operand2}, {temp_address})"
         self.code_generator.add_code(code)
 
-    def start_argument_list(self, previous_token: TokenDTO):
+    def start_args(self, previous_token: TokenDTO):
         self.argument_counts.append(0)
         self.called_functions.append(self.current_id)
 
@@ -107,7 +107,6 @@ class ActionManager:
     def assign(self, previous_token: TokenDTO):
         value = self.code_generator.ss.pop()
         address = self.code_generator.ss.pop()
-        # code = f"(ASSIGN, {value}, {address}, {self.symbol_table.find_symbol_by_address(address).lexeme})"
         code = f"(ASSIGN, {value}, {address}, )"
         self.code_generator.add_code(code)
         self.code_generator.ss.append(value)  # todo: why?
@@ -117,10 +116,10 @@ class ActionManager:
 
     def declare_array(self, previous_token: TokenDTO):
         length = int(self.code_generator.ss.pop()[1:])
-        symbol = self.code_generator.symbol_table.scopes[-1][-1]
+        symbol = self.code_generator.symbol_table.get_last_symbol()
         symbol.is_array = True
         size = length * 4
-        array_start_address = self.code_generator.get_next_data_address(size=size)
+        array_start_address = self.code_generator.get_data_address(size=size)
         code = f"(ASSIGN, #{array_start_address}, {symbol.address}, )"
         self.code_generator.add_code(code)
         if len(self.code_generator.symbol_table.scopes) > 1:
@@ -130,7 +129,7 @@ class ActionManager:
 
     def array_index(self, previous_token: TokenDTO):
         offset = self.code_generator.ss.pop()
-        temp = self.code_generator.get_next_temp_address()
+        temp = self.code_generator.get_temp_address()
         array_start = self.code_generator.ss.pop()
         self.code_generator.add_code(f"(MULT, {offset}, #4, {temp})")
         self.code_generator.add_code(f"(ADD, {temp}, {array_start}, {temp})")
@@ -144,8 +143,9 @@ class ActionManager:
 
     def for_jump_check_condition(self, previous_token: TokenDTO):
         self.code_generator.add_code(f"(JP, {self.code_generator.ss[-5]}, , )")
-        self.code_generator.add_code(f"(JP, {self.code_generator.get_current_code_stack_head()}, , )", self.code_generator.ss[-2])
-        self.code_generator.add_code(f"(ASSIGN, #0, {self.code_generator.temp_address - 4}, )")
+        self.code_generator.add_code(f"(JP, {self.code_generator.get_current_code_stack_head()}, , )",
+                                     self.code_generator.ss[-2])
+        self.code_generator.add_code(f"(ASSIGN, #0, {self.code_generator.temp_ptr - 4}, )")
 
     def for_save(self, previous_token: TokenDTO):
         cond_result = self.code_generator.ss.pop()
@@ -158,7 +158,6 @@ class ActionManager:
         jpf_code = f"(JPF, {check_result}, #{self.code_generator.get_current_code_stack_head() + 1}, )"
         self.code_generator.add_code(jpf_code, check_saved_index)
 
-
         add = str(jp_index)
         if add[0] == '#':
             add = int(add[1:])
@@ -166,7 +165,6 @@ class ActionManager:
             add = int(add)
         jp_code = f"(JP, {str(add + 1)}, , )"
         self.code_generator.add_code(jp_code)
-
 
     def break_scope(self, previous_token: TokenDTO):
         self.breaks.append([])
@@ -181,7 +179,6 @@ class ActionManager:
 
         self.breaks.pop()
 
-
     def debug(self, previous_token: TokenDTO):
         print(self.code_generator.get_current_code_stack_head())
 
@@ -194,24 +191,22 @@ class ActionManager:
     def set_function_scope_flag(self, previous_token: TokenDTO):
         self.function_scope_has_opened = True
 
-    def open_scope(self, previous_token: TokenDTO):
+    def start_scope(self, previous_token: TokenDTO):
         if not self.function_scope_has_opened:
             self.code_generator.symbol_table.add_new_scope()
         self.function_scope_has_opened = False
-        self.code_generator.data_and_temp_stack.append(
-            (self.code_generator.data_address, self.code_generator.temp_address))
+        self.code_generator.ptr_stack.append(
+            (self.code_generator.data_ptr, self.code_generator.temp_ptr))
 
-    def close_scope(self, previous_token: TokenDTO):
+    def end_scope(self, previous_token: TokenDTO):
         self.code_generator.symbol_table.close_scope()
-        self.code_generator.data_address, self.code_generator.temp_address = self.code_generator.data_and_temp_stack.pop()
+        self.code_generator.data_ptr, self.code_generator.temp_ptr = self.code_generator.ptr_stack.pop()
 
-    def pop_param(self, previous_token: TokenDTO):
+    def add_param(self, previous_token: TokenDTO):
         address = self.code_generator.ss.pop()
-        self.code_generator.runtime_stack.pop(address)
+        self.code_generator.call_stack.pop(address)
         symbol = self.code_generator.symbol_table.find_symbol_by_address(address)
-        # symbol.symbol_type = self.current_type
         if previous_token and previous_token.lexeme == ']':
-            # symbol.symbol_type = ARRAY
             symbol.is_array = True
         self.current_declared_function_symbol_item.param_symbols.append(symbol)
         if symbol:
@@ -222,85 +217,79 @@ class ActionManager:
         func_declaration_symbol_item: SymbolTableItem = self.code_generator.symbol_table.get_last_symbol()
         func_declaration_symbol_item.address = f"#{self.code_generator.get_current_code_stack_head()}"
         func_declaration_symbol_item.is_function = True
-        # func_declaration_symbol_item.symbol_type = self.current_type
         func_declaration_symbol_item.param_count = 0
         self.current_declared_function_symbol_item = func_declaration_symbol_item
-        # self.void_flag = False
-        self.code_generator.function_data_start_pointer = self.code_generator.data_address
-        self.code_generator.function_temp_start_pointer = self.code_generator.temp_address
+        self.code_generator.function_data_ptr = self.code_generator.data_ptr
+        self.code_generator.function_temp_ptr = self.code_generator.temp_ptr
 
     def call(self, previous_token: TokenDTO):
         self.store_data_and_temp()
-        self.code_generator.register_file.push_registers()
+        self.code_generator.machine_state.save_machine_state()
 
         arg_count = self.argument_counts.pop()
-        self.code_generator.register_file.save_return_address(arg_count)
+        self.code_generator.machine_state.save_return_address(arg_count)
 
         self.make_call(arg_count)
 
-        self.code_generator.register_file.pop_registers()
+        self.code_generator.machine_state.restore_machine_state()
         self.restore_data_and_temp()
 
         self.retrieve_return_value()
 
     def retrieve_return_value(self):
-        temp = self.code_generator.get_next_temp_address()
+        temp = self.code_generator.get_temp_address()
         self.code_generator.ss.append(temp)
-        code = f"(ASSIGN, {self.code_generator.register_file.return_value_register_address}, {temp}, )"
+        code = f"(ASSIGN, {self.code_generator.machine_state.return_value_ptr}, {temp}, )"
         self.code_generator.add_code(code)
 
     def restore_data_and_temp(self):
-        for address in range(self.code_generator.temp_address, self.code_generator.function_temp_start_pointer, -4):
-            self.code_generator.runtime_stack.pop(address - 4)
-        for address in range(self.code_generator.data_address, self.code_generator.function_data_start_pointer, -4):
+        for address in range(self.code_generator.temp_ptr, self.code_generator.function_temp_ptr, -4):
+            self.code_generator.call_stack.pop(address - 4)
+        for address in range(self.code_generator.data_ptr, self.code_generator.function_data_ptr, -4):
             symbol = self.code_generator.symbol_table.find_symbol_by_address(address - 4)
             if symbol and symbol.is_initialized:
-                self.code_generator.runtime_stack.pop(address - 4)
+                self.code_generator.call_stack.pop(address - 4)
 
     def make_call(self, arg_count):
         for i in range(arg_count):
             data = self.code_generator.ss.pop()
-            self.code_generator.runtime_stack.push(data)
+            self.code_generator.call_stack.push(data)
         address = self.code_generator.ss.pop()
         code = f"(JP, {address}, , )"
         self.code_generator.add_code(code)
 
     def store_data_and_temp(self):
-        for address in range(self.code_generator.function_data_start_pointer, self.code_generator.data_address, 4):
+        for address in range(self.code_generator.function_data_ptr, self.code_generator.data_ptr, 4):
             symbol = self.code_generator.symbol_table.find_symbol_by_address(address)
             if symbol and symbol.is_initialized:
-                self.code_generator.runtime_stack.push(address)
-        for address in range(self.code_generator.function_temp_start_pointer, self.code_generator.temp_address, 4):
-            self.code_generator.runtime_stack.push(address)
+                self.code_generator.call_stack.push(address)
+        for address in range(self.code_generator.function_temp_ptr, self.code_generator.temp_ptr, 4):
+            self.code_generator.call_stack.push(address)
 
     def set_return_value(self, previous_token: TokenDTO):
         value = self.code_generator.ss.pop()
-        self.code_generator.register_file.save_return_value(value)
+        self.code_generator.machine_state.save_return_value(value)
 
     def return_back(self, previous_token: TokenDTO):
         if not self.has_reached_main:
-            code = f"(JP, @{self.code_generator.register_file.return_address_register_address}, , )"
+            code = f"(JP, @{self.code_generator.machine_state.return_address_ptr}, , )"
             self.code_generator.add_code(code)
 
-    def add_argument_count(self, previous_token: TokenDTO):
+    def add_arg(self, previous_token: TokenDTO):
         self.argument_counts[-1] += 1
 
-    def end_argument_count(self, previous_token: TokenDTO):
+    def end_args(self, previous_token: TokenDTO):
         pass
-        # self.argument_counts[-1] += 1
 
     def init_zero(self, previous_token: TokenDTO):
         if len(self.code_generator.symbol_table.scopes) > 1:
-            symbol = self.code_generator.symbol_table.scopes[-1][-1]
-            # code = f"(ASSIGN, {symbol.address}, #0, {symbol.lexeme})"
+            symbol = self.code_generator.symbol_table.get_last_symbol()
             code = f"(ASSIGN, #0, {symbol.address}, )"
             self.code_generator.add_code(code)
 
     def array_param(self, previous_token: TokenDTO):
-        symbol = self.code_generator.symbol_table.scopes[-1][-1]
+        symbol = self.code_generator.symbol_table.get_last_symbol()
         symbol.is_array = True
-        # symbol.symbol_type = ARRAY
-
 
     def void_check(self, previous_token: TokenDTO, ):
         self.void_flag = True
@@ -308,12 +297,9 @@ class ActionManager:
     def save_type(self, previous_token: TokenDTO, ):
         self.current_type = previous_token.lexeme
 
-    def pop(self, previous_token: TokenDTO):
-        self.code_generator.ss.pop()
-
     def negate(self, previous_token: TokenDTO):
         operand = self.code_generator.ss.pop()
-        temp = self.code_generator.get_next_temp_address()
+        temp = self.code_generator.get_temp_address()
         self.code_generator.ss.append(temp)
         code = f"(SUB, #0, {operand}, {temp})"
         self.code_generator.add_code(code)
