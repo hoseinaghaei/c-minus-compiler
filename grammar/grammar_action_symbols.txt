@@ -35,9 +35,9 @@ Term -> Signed-factor G
 Term-prime -> Signed-factor-prime G
 Term-zegond -> Signed-factor-zegond G
 G -> * #poperand Signed-factor #eval_operation G | EPSILON
-Signed-factor -> + #poperand Factor | - #poperand Factor | Factor
+Signed-factor -> + Factor | - Factor #negate | Factor
 Signed-factor-prime -> Factor-prime
-Signed-factor-zegond -> + #poperand Factor #eval_operation | - #poperand Factor #eval_operation | Factor-zegond
+Signed-factor-zegond -> + Factor | - Factor #negate | Factor-zegond
 Factor -> ( Expression ) | ID #pid Var-call-prime | NUM #pnum
 Var-call-prime -> ( #start_argument Args #end_argument) #call | Var-prime
 Var-prime -> [ Expression #array_index ] | EPSILON

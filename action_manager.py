@@ -323,3 +323,10 @@ class ActionManager:
 
     def pop(self, previous_token: TokenDTO):
         self.code_generator.ss.pop()
+
+    def negate(self, previous_token: TokenDTO):
+        operand = self.code_generator.ss.pop()
+        temp = self.code_generator.get_next_temp_address()
+        self.code_generator.ss.append(temp)
+        code = f"(SUB, #0, {operand}, {temp})"
+        self.code_generator.add_code(code)

@@ -59,6 +59,7 @@ class CodeGenerator:
             ActionSymbol.BREAKSCOPE: self.action_manager.break_scope,
             ActionSymbol.BREAKSAVE: self.action_manager.break_save,
             ActionSymbol.DEBUG: self.action_manager.debug,
+            ActionSymbol.NEGATE: self.action_manager.negate,
         }
 
         self.add_code(f"(ASSIGN, #{self.temp_address}, {self.register_file.stack_pointer_register_address}, )")

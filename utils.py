@@ -138,6 +138,7 @@ class ActionSymbol(Enum):
     DEBUG = "debug"
     ARRAY_PARAM = "array_param"
     DECLARE_ARRAY = "declare_array"
+    NEGATE = "negate"
 
 
 class TokenType(Enum):
