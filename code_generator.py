@@ -8,9 +8,9 @@ from utils import SymbolTable, ActionSymbol, TokenDTO
 class CodeGenerator:
     def __init__(self):
         # self.i = 0
-        self.data_address = 100
+        self.data_address = 10000
         # self.data_address = 100000
-        self.temp_address = 500
+        self.temp_address = 50000
         # self.temp_address = 500004
         self.ss = []
         self.data_and_temp_stack = []

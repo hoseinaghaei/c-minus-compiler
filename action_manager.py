@@ -136,19 +136,6 @@ class ActionManager:
         self.code_generator.add_code(f"(ADD, {temp}, {array_start}, {temp})")
         self.code_generator.ss.append(f"@{temp}")
 
-    # def start_break_scope(self, previous_token: TokenDTO):
-    #     self.breaks.append([])
-    #
-    # def add_break(self, previous_token: TokenDTO):
-    #     self.breaks[-1].append(self.code_generator.i)
-    #     self.code_generator.i += 1
-    #
-    # def handle_breaks(self, previous_token: TokenDTO):
-    #     for destination in self.breaks[-1]:
-    #         instruction = JP(f"#{self.code_generator.i}")
-    #         self.code_generator.add_code(instruction, destination)
-    #     self.breaks.pop()
-
     def pop(self, previous_token: TokenDTO):
         self.code_generator.ss.pop()
 
