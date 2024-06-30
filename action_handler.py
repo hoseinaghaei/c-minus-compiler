@@ -84,6 +84,12 @@ class ActionHandler:
         code = f"({operation_to_func_name[operation]}, {operand1}, {operand2}, {temp_address})"
         self.code_generator.add_code(code)
 
+        # type checking
+        operand1_type = self.symbol_table.get_type_by_address(operand1)
+        operand2_type = self.symbol_table.get_type_by_address(operand2)
+        if operand1_type != operand2_type:
+            self.semantic_handler.operand_type_mismatch(operand2_type, operand1_type)
+
     def start_else(self, previous_token: TokenDTO):
         code_stack_index = self.code_generator.ss.pop()
         condition = self.code_generator.ss.pop()
