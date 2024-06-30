@@ -1,7 +1,7 @@
 import scanner
 
 
-class SemanticHandler:
+class SemanticErrorHandler:
     def __init__(self):
         self.errors = []
 
@@ -25,11 +25,6 @@ class SemanticHandler:
 
     def arg_type_mismatch(self, expected, given, index, func_name):
         self.errors.append((scanner.line_number, f"Mismatch in type of argument {index + 1} of '{func_name}'. Expected '{expected}' but got '{given}' instead."))
-
-
-    def test0000(self):
-        print("-----------------")
-        print(scanner.line_number)
 
     def generate_error_file(self):
         if self.has_error():

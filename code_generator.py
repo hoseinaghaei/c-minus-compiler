@@ -2,14 +2,11 @@ from program import Program
 from machine_state import MachineState
 from action_handler import ActionHandler
 from call_stack import CallStack
-from semantic_handler import SemanticHandler
 from utils import SymbolTable, ActionSymbol, TokenDTO
 
 
 class CodeGenerator:
     def __init__(self):
-        self.semantic_handler = SemanticHandler()
-
         self.data_ptr = 10000
         self.temp_ptr = 50000
         self.function_data_ptr = 0
@@ -22,7 +19,7 @@ class CodeGenerator:
         self.symbol_table = SymbolTable(self)
         self.machine_state = MachineState(self)
         self.call_stack = CallStack(self, self.machine_state)
-        self.action_handler = ActionHandler(self, self.symbol_table, self.semantic_handler)
+        self.action_handler = ActionHandler(self, self.symbol_table)
 
         self.machine_state.initialize_machine_state(self.get_temp_address())
 
@@ -69,8 +66,8 @@ class CodeGenerator:
         }
         self.add_output_function()
 
-    def handle_action_symbol(self, action_symbol: ActionSymbol, *args):
-        self.action_symbol_mapper[action_symbol](*args)
+    def handle_action_symbol(self, action_symbol: ActionSymbol, previous_token: TokenDTO):
+        self.action_symbol_mapper[action_symbol](previous_token)
 
     def add_code(self, code, address=None):
         if type(address) == str and address[0] == '#':
@@ -112,6 +109,5 @@ class CodeGenerator:
         self.handle_action_symbol(ActionSymbol.END_SCOPE, None)
         self.handle_action_symbol(ActionSymbol.RETURN, None)
 
-    def generate_output(self):
-        self.semantic_handler.generate_error_file()
-        self.program.generate_output_file(self.semantic_handler.has_error())
+    def generate_output(self, has_error):
+        self.program.generate_output_file(has_error)

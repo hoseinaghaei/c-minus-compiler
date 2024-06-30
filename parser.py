@@ -3,14 +3,16 @@ from anytree import Node, RenderTree
 import utils
 from code_generator import CodeGenerator
 from grammar import Grammar
+from semantic_analyzer import SemanticAnalyzer
 from utils import NonTerminal, Terminal, TokenType
 from scanner import Scanner
 
 
 class Parser(object):
-    def __init__(self, code_generator: CodeGenerator, file='input.txt'):
+    def __init__(self, file='input.txt'):
         self.grammar = Grammar()
-        self.code_generator = code_generator
+        self.code_generator = CodeGenerator()
+        self.semantic_analyzer = SemanticAnalyzer(self.code_generator)
         self.scanner = Scanner(self.code_generator.symbol_table)
         self.look_ahead = None
         self.previous_token = None
@@ -94,6 +96,7 @@ class Parser(object):
                 if isinstance(token, Terminal):
                     self._match(token.value)
                 elif isinstance(token, utils.ActionSymbol):
+                    self.semantic_analyzer.handle_action_symbol(token, self.previous_token)
                     self.code_generator.handle_action_symbol(token, self.previous_token)
                 else:
                     current_node = self.current_node
@@ -120,5 +123,6 @@ class Parser(object):
 
     def parse(self):
         self._do_parse(self.grammar.statr_non_terminal)
-        self.code_generator.generate_output()
+        self.code_generator.generate_output(self.semantic_analyzer.semantic_error_handler.has_error())
+        self.semantic_analyzer.semantic_error_handler.generate_error_file()
         self._exit()
