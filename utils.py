@@ -119,7 +119,7 @@ class ActionSymbol(Enum):
     DECLARE_FUNCTION = "declare_function"
     ADD_PARAM = "add_param"
     START_SCOPE = "start_scope"
-    START_SCOPE_FLAG = "start_scope_flag"
+    START_FUNC_SCOPE_FLAG = "start_scope_flag"
     END_SCOPE = "end_scope"
     RETURN_VALUE = "return_value"
     ASSIGN = "assign"
@@ -138,6 +138,8 @@ class ActionSymbol(Enum):
     ARRAY_PARAM = "array_param"
     DECLARE_ARRAY = "declare_array"
     NEGATE = "negate"
+    CHECK_VOID = "check_void"
+    SET_TYPE = "set_type"
 
 
 class TokenType(Enum):
@@ -176,12 +178,23 @@ class SymbolTable(object):
             for symbol in scope:
                 if symbol.lexeme == lexeme:
                     return symbol
+        return None
 
     def find_symbol_by_address(self, address):
         for scope in reversed(self.scopes):
             for symbol in scope:
                 if symbol.address == address:
                     return symbol
+
+    def get_type_by_address(self, address):
+        if type(address) == str and address[0] == '#':
+            return 'int'
+        symbol = self.find_symbol_by_address(address)
+        if symbol is None:
+            return 'int'
+        if symbol.is_array:
+            return 'array'
+        return 'int'
 
     def get_last_symbol(self):
         return self.scopes[-1][-1]

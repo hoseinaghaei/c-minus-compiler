@@ -61,13 +61,16 @@ class Parser(object):
             return f"({self.look_ahead_type}, {self.look_ahead})"
 
     def _match(self, param):
-        node = Node(self.get_terminal_pair_to_show(), parent=self.current_node)
-        if param == self.look_ahead:
+        while param != self.look_ahead:
             self._next_token()
-        else:
-            self.input_has_syntax_error = True
-            self.syntax_error_file.write(f"#{self.scanner.lineno} : syntax error, missing {param}\n")
-            utils.remove_node(node)
+        self._next_token()
+        # node = Node(self.get_terminal_pair_to_show(), parent=self.current_node)
+        # if param == self.look_ahead:
+        #     self._next_token()
+        # else:
+        #     self.input_has_syntax_error = True
+        #     self.syntax_error_file.write(f"#{self.scanner.lineno} : syntax error, missing {param}\n")
+        #     utils.remove_node(node)
 
     def _do_parse(self, non_terminal: NonTerminal):
         self.current_non_terminal = non_terminal

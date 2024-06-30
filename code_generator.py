@@ -2,13 +2,16 @@ from program import Program
 from machine_state import MachineState
 from action_handler import ActionHandler
 from call_stack import CallStack
+from semantic_handler import SemanticHandler
 from utils import SymbolTable, ActionSymbol, TokenDTO
 
 
 class CodeGenerator:
     def __init__(self):
-        self.data_ptr = 5000
-        self.temp_ptr = 10000
+        self.semantic_handler = SemanticHandler()
+
+        self.data_ptr = 10000
+        self.temp_ptr = 50000
         self.function_data_ptr = 0
         self.function_temp_ptr = 0
 
@@ -19,7 +22,7 @@ class CodeGenerator:
         self.symbol_table = SymbolTable(self)
         self.machine_state = MachineState(self)
         self.call_stack = CallStack(self, self.machine_state)
-        self.action_handler = ActionHandler(self, self.symbol_table)
+        self.action_handler = ActionHandler(self, self.symbol_table, self.semantic_handler)
 
         self.machine_state.initialize_machine_state(self.get_temp_address())
 
@@ -38,7 +41,7 @@ class CodeGenerator:
             ActionSymbol.ENDIF: self.action_handler.endif,
             ActionSymbol.ENDIF_AFTER_ELSE: self.action_handler.endif_after_else,
             ActionSymbol.DECLARE_FUNCTION: self.action_handler.declare_function,
-            ActionSymbol.START_SCOPE_FLAG: self.action_handler.set_function_scope_flag,
+            ActionSymbol.START_FUNC_SCOPE_FLAG: self.action_handler.set_function_scope_flag,
             ActionSymbol.ADD_PARAM: self.action_handler.add_param,
             ActionSymbol.START_SCOPE: self.action_handler.start_scope,
             ActionSymbol.END_SCOPE: self.action_handler.end_scope,
@@ -61,6 +64,8 @@ class CodeGenerator:
             ActionSymbol.BREAK_SAVE: self.action_handler.break_save,
             ActionSymbol.DEBUG: self.action_handler.debug,
             ActionSymbol.NEGATE: self.action_handler.negate,
+            ActionSymbol.CHECK_VOID: self.action_handler.check_void,
+            ActionSymbol.SET_TYPE: self.action_handler.set_type,
         }
         self.add_output_function()
 
@@ -94,13 +99,13 @@ class CodeGenerator:
 
     def add_output_function(self):
         self.symbol_table.add_id_if_not_exist('output')
-        self.handle_action_symbol(ActionSymbol.PID, TokenDTO(lexeme='output'))
+        # self.handle_action_symbol(ActionSymbol.PID, TokenDTO(lexeme='output'))
         self.handle_action_symbol(ActionSymbol.DECLARE_FUNCTION, None)
         self.handle_action_symbol(ActionSymbol.START_SCOPE, None)
-        self.handle_action_symbol(ActionSymbol.START_SCOPE_FLAG, None)
+        self.handle_action_symbol(ActionSymbol.START_FUNC_SCOPE_FLAG, None)
         self.symbol_table.add_id_if_not_exist('a')
-        self.handle_action_symbol(ActionSymbol.PID, TokenDTO(lexeme="a"))
-        self.handle_action_symbol(ActionSymbol.ADD_PARAM, None)
+        # self.handle_action_symbol(ActionSymbol.PID, TokenDTO(lexeme="a"))
+        self.handle_action_symbol(ActionSymbol.ADD_PARAM, TokenDTO(lexeme="a"))
         self.handle_action_symbol(ActionSymbol.PID, TokenDTO(lexeme="a"))
         self.handle_action_symbol(ActionSymbol.START_SCOPE, None)
         self.add_code(f"(PRINT, {self.ss.pop()}, , )")
@@ -108,4 +113,5 @@ class CodeGenerator:
         self.handle_action_symbol(ActionSymbol.RETURN, None)
 
     def generate_output(self):
-        self.program.generate_output_file()
+        self.semantic_handler.generate_error_file()
+        self.program.generate_output_file(self.semantic_handler.has_error())

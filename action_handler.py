@@ -1,33 +1,39 @@
 from typing import TYPE_CHECKING
 
+from semantic_handler import SemanticHandler
+
 if TYPE_CHECKING:
     from code_generator import CodeGenerator
 from utils import SymbolTable, TokenDTO, SymbolTableItem
 
 
 class ActionHandler:
-    def __init__(self, code_generator: "CodeGenerator", symbol_table: SymbolTable):
+    def __init__(self, code_generator: "CodeGenerator", symbol_table: SymbolTable, semantic_handler: SemanticHandler):
         self.code_generator = code_generator
         self.symbol_table = symbol_table
+        self.semantic_handler = semantic_handler
         self.argument_counts = []
-        self.current_declared_function_symbol_item = None
+        self.current_function = None
         self.current_id = None
         self.current_type = None
         self.called_functions = []
-        self.no_push_flag = False
         self.check_declaration_flag = False
         self.function_scope_has_opened = False
         self.breaks = []
         self.has_reached_main = False
         self.current_id = ""
         self.void_flag = False
+        self.last_type = None
 
     def pid(self, previous_token: TokenDTO):
         self.current_id = previous_token.lexeme
         self.check_if_its_main(previous_token)
-        if not self.no_push_flag:
-            address = self.symbol_table.find_symbol(previous_token.lexeme).address
-            self.code_generator.ss.append(address)
+        symbol = self.symbol_table.find_symbol(previous_token.lexeme)
+        if symbol is not None:
+            self.code_generator.ss.append(symbol.address)
+        else:
+            self.semantic_handler.not_defined(previous_token.lexeme)
+            self.code_generator.ss.append("#0")  # to avoid ss empty error
 
     def declare_id(self, previous_token: TokenDTO):
         self.current_id = previous_token.lexeme
@@ -78,10 +84,6 @@ class ActionHandler:
         code = f"({operation_to_func_name[operation]}, {operand1}, {operand2}, {temp_address})"
         self.code_generator.add_code(code)
 
-    def start_args(self, previous_token: TokenDTO):
-        self.argument_counts.append(0)
-        self.called_functions.append(self.current_id)
-
     def start_else(self, previous_token: TokenDTO):
         code_stack_index = self.code_generator.ss.pop()
         condition = self.code_generator.ss.pop()
@@ -109,10 +111,16 @@ class ActionHandler:
         address = self.code_generator.ss.pop()
         code = f"(ASSIGN, {value}, {address}, )"
         self.code_generator.add_code(code)
-        self.code_generator.ss.append(value)  # todo: why?
+        self.code_generator.ss.append(value)
         symbol = self.code_generator.symbol_table.find_symbol_by_address(address)
         if symbol:
             symbol.is_initialized = True
+
+        # type checking
+        value_type = self.symbol_table.get_type_by_address(value)
+        symbol_type = self.symbol_table.get_type_by_address(address)
+        if value_type != symbol_type:
+            self.semantic_handler.operand_type_mismatch(value_type, symbol_type)
 
     def declare_array(self, previous_token: TokenDTO):
         length = int(self.code_generator.ss.pop()[1:])
@@ -170,13 +178,15 @@ class ActionHandler:
         self.breaks.append([])
 
     def break_key(self, previous_token: TokenDTO):
-        self.breaks[-1].append(self.code_generator.get_current_code_stack_head())
-        self.code_generator.move_code_stack_head()
+        if len(self.breaks) > 0:
+            self.breaks[-1].append(self.code_generator.get_current_code_stack_head())
+            self.code_generator.move_code_stack_head()
+        else:
+            self.semantic_handler.illegal_break()
 
     def break_save(self, previous_token: TokenDTO):
         for i in self.breaks[-1]:
             self.code_generator.add_code(f"(JP, {self.code_generator.get_current_code_stack_head()}, , )", i)
-
         self.breaks.pop()
 
     def debug(self, previous_token: TokenDTO):
@@ -203,22 +213,19 @@ class ActionHandler:
         self.code_generator.data_ptr, self.code_generator.temp_ptr = self.code_generator.ptr_stack.pop()
 
     def add_param(self, previous_token: TokenDTO):
-        address = self.code_generator.ss.pop()
-        self.code_generator.call_stack.pop(address)
-        symbol = self.code_generator.symbol_table.find_symbol_by_address(address)
-        if previous_token and previous_token.lexeme == ']':
-            symbol.is_array = True
-        self.current_declared_function_symbol_item.param_symbols.append(symbol)
-        if symbol:
-            symbol.is_initialized = True
-            self.current_declared_function_symbol_item.param_count += 1
+        self.current_id = previous_token.lexeme
+        symbol = self.symbol_table.get_last_symbol()
+        self.code_generator.call_stack.pop(symbol.address)
+        self.current_function.param_symbols.append(symbol)
+        symbol.is_initialized = True
+        self.current_function.param_count += 1
 
     def declare_function(self, previous_token: TokenDTO):
-        func_declaration_symbol_item: SymbolTableItem = self.code_generator.symbol_table.get_last_symbol()
-        func_declaration_symbol_item.address = f"#{self.code_generator.get_current_code_stack_head()}"
-        func_declaration_symbol_item.is_function = True
-        func_declaration_symbol_item.param_count = 0
-        self.current_declared_function_symbol_item = func_declaration_symbol_item
+        func_declared: SymbolTableItem = self.code_generator.symbol_table.get_last_symbol()
+        func_declared.address = f"#{self.code_generator.get_current_code_stack_head()}"
+        func_declared.is_function = True
+        func_declared.param_count = 0
+        self.current_function = func_declared
         self.code_generator.function_data_ptr = self.code_generator.data_ptr
         self.code_generator.function_temp_ptr = self.code_generator.temp_ptr
 
@@ -275,11 +282,28 @@ class ActionHandler:
             code = f"(JP, @{self.code_generator.machine_state.return_address_ptr}, , )"
             self.code_generator.add_code(code)
 
+    def start_args(self, previous_token: TokenDTO):
+        self.argument_counts.append(0)
+        self.called_functions.append(self.current_id)
+
     def add_arg(self, previous_token: TokenDTO):
         self.argument_counts[-1] += 1
 
     def end_args(self, previous_token: TokenDTO):
-        pass
+        function_name = self.called_functions.pop()
+        arg_count = self.argument_counts[-1]
+        function = self.symbol_table.find_symbol(function_name)
+        if function:
+            param_count = function.param_count
+            self.argument_counts[-1] = param_count
+            if param_count != arg_count:
+                self.semantic_handler.arg_num_mismatch(function.lexeme)
+                if param_count > arg_count:
+                    for _ in range(param_count - arg_count):
+                        self.code_generator.ss.append("#0")
+                else:
+                    for _ in range(arg_count - param_count):
+                        self.code_generator.ss.pop()
 
     def init_zero(self, previous_token: TokenDTO):
         if len(self.code_generator.symbol_table.scopes) > 1:
@@ -303,3 +327,12 @@ class ActionHandler:
         self.code_generator.ss.append(temp)
         code = f"(SUB, #0, {operand}, {temp})"
         self.code_generator.add_code(code)
+
+    def check_void(self, previous_token: TokenDTO):
+        var = self.symbol_table.get_last_symbol()
+        if self.last_type == 'void':
+            self.semantic_handler.illegal_void(var.lexeme)
+
+    def set_type(self, previous_token: TokenDTO):
+        self.last_type = previous_token.token_type
+

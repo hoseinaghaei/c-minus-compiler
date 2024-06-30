@@ -12,10 +12,13 @@ class Program(object):
         while self.get_code_stack_head() <= new_size:
             self.codes.append('')
 
-    def generate_output_file(self):
+    def generate_output_file(self, has_error):
         output_file = open('output.txt', 'w')
-        for lineno in range(self.get_code_stack_head()):
-            output_file.write(f"{lineno}\t{self.codes[lineno]}\n")
+        if has_error:
+            output_file.write("The code has not been generated.\n")
+        else:
+            for lineno in range(self.get_code_stack_head()):
+                output_file.write(f"{lineno}\t{self.codes[lineno]}\n")
         output_file.close()
 
     def get_code_stack_head(self):

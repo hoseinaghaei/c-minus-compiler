@@ -2,6 +2,8 @@ from enum import Enum
 from utils import Token, TokenType, keywords, SymbolTable
 import re
 
+line_number = 1
+
 
 class STATE(Enum):
     INIT = 0
@@ -174,6 +176,8 @@ class Scanner(object):
                 self.look_ahead = False
                 if c == '\n':
                     self.lineno += 1
+                    global line_number
+                    line_number = self.lineno
                     self.first_token_of_line = True
 
             self.dfa.current_state = next_state
