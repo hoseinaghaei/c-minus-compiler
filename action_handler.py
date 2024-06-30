@@ -258,12 +258,23 @@ class ActionHandler:
                 self.code_generator.call_stack.pop(address - 4)
 
     def make_call(self, arg_count):
+        arg_types = []
         for i in range(arg_count):
             data = self.code_generator.ss.pop()
             self.code_generator.call_stack.push(data)
-        address = self.code_generator.ss.pop()
-        code = f"(JP, {address}, , )"
+            arg_types.append(self.symbol_table.get_type_by_address(data))
+        function_address = self.code_generator.ss.pop()
+        code = f"(JP, {function_address}, , )"
         self.code_generator.add_code(code)
+
+        # type checking
+        arg_types.reverse()
+        function_symbol = self.symbol_table.find_symbol_by_address(function_address)
+        param_types = [param.get_type() for param in function_symbol.param_symbols]
+        for i in range(arg_count):
+            if arg_types[i] != param_types[i]:
+                self.semantic_handler.arg_type_mismatch(param_types[i], arg_types[i], i, function_symbol.lexeme)
+
 
     def store_data_and_temp(self):
         for address in range(self.code_generator.function_data_ptr, self.code_generator.data_ptr, 4):

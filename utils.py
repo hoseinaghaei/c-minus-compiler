@@ -161,6 +161,11 @@ class SymbolTableItem:
         self.is_function = False
         self.is_array = False
 
+    def get_type(self):
+        if self.is_array:
+            return 'array'
+        return 'int'
+
 
 class SymbolTable(object):
     def __init__(self, code_generator: "CodeGenerator"):
@@ -192,9 +197,7 @@ class SymbolTable(object):
         symbol = self.find_symbol_by_address(address)
         if symbol is None:
             return 'int'
-        if symbol.is_array:
-            return 'array'
-        return 'int'
+        return symbol.get_type()
 
     def get_last_symbol(self):
         return self.scopes[-1][-1]

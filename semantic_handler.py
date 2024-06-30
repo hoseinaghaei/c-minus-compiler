@@ -23,6 +23,10 @@ class SemanticHandler:
     def operand_type_mismatch(self, expected, given):
         self.errors.append((scanner.line_number, f"Type mismatch in operands, Got {given} instead of {expected}."))
 
+    def arg_type_mismatch(self, expected, given, index, func_name):
+        self.errors.append((scanner.line_number, f"Mismatch in type of argument {index + 1} of '{func_name}'. Expected '{expected}' but got '{given}' instead."))
+
+
     def test0000(self):
         print("-----------------")
         print(scanner.line_number)
