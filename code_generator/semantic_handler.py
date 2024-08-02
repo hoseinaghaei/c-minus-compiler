@@ -1,4 +1,4 @@
-import scanner
+from scanner import scanner
 
 
 class SemanticErrorHandler:

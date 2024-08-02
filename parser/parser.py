@@ -3,9 +3,9 @@ from anytree import Node, RenderTree
 import utils
 from code_generator import CodeGenerator
 from grammar import Grammar
-from semantic_analyzer import SemanticAnalyzer
+from code_generator.semantic_analyzer import SemanticAnalyzer
 from utils import NonTerminal, Terminal, TokenType
-from scanner import Scanner
+from scanner.scanner import Scanner
 
 
 class Parser(object):
