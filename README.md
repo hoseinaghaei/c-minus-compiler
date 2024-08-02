@@ -2,6 +2,13 @@
 
 **a Python3 based one-pass compiler for a very simplified C-minus**
 
+## Main Parts
+- Scanner
+- Parser
+- Intermediate Code Generator
+- Semantic Analyzer
+- Recursive Functions Call
+
 ## Token Types and Grammar
 
 The tokens in the below table can be recognized by the compiler:
