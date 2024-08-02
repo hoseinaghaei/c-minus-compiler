@@ -36,6 +36,10 @@ You can also see this [branch](https://github.com/hoseinaghaei/c-minus-compiler/
 Parser is the part of the compiler that recognizes the grammar used by the input.
 This project implements a Predictive Recursive Descent parser. Additional information and how to use can be viewed in [README of Parser](https://github.com/hoseinaghaei/c-minus-compiler/blob/master/parser/README.md).
 
+## Third Phase : Code Generator, Recursive Calls, Semantic Analyzer
+We added some Action Symbols to the grammar and when parser find them, it calls the [code generator](https://github.com/hoseinaghaei/c-minus-compiler/blob/master/code_generator/code_generator.py) and [semantic analyzer](https://github.com/hoseinaghaei/c-minus-compiler/blob/master/code_generator/semantic_analyzer.py).
+We detect errors like `undifined varables`, `Mismatch in numbers of arguments`, `wrong breaks`, `Illegal type` , and `mismatch in operands`.
+
 ## Test
 You can run the file [test.sh](https://github.com/hoseinaghaei/c-minus-compiler/blob/master/test.sh). It goes through Testcases folder and run all tests starting with T. You can also run test by yourself; Just create file `input.txt` in the root of the project and then run `compiler.py`.
 
