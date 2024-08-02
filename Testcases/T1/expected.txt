@@ -1,0 +1,4 @@
+PRINT    0
+PRINT    1
+PRINT    12
+PRINT    14

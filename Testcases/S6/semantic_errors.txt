@@ -1,0 +1,5 @@
+#15 : Semantic Error! 'res' is not defined.
+#16 : Semantic Error! 'res' is not defined.
+#21 : Semantic Error! Illegal type of void for 'num2'.
+#27 : Semantic Error! Mismatch in numbers of arguments of 'g'.
+#30 : Semantic Error! No 'for' found for 'break'.

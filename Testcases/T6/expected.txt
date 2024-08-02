@@ -1,0 +1,6 @@
+PRINT    100
+PRINT    400
+PRINT    0
+PRINT    1
+PRINT    0
+PRINT    8

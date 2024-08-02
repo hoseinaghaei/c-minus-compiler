@@ -1,0 +1,9 @@
+PRINT    6
+PRINT    12
+PRINT    30
+PRINT    44
+PRINT    2
+PRINT    8
+PRINT    20
+PRINT    29
+PRINT    73

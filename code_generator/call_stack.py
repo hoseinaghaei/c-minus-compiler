@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from machine_state import MachineState
+from code_generator.machine_state import MachineState
 
 if TYPE_CHECKING:
     from code_generator import CodeGenerator

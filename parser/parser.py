@@ -1,8 +1,8 @@
 from anytree import Node, RenderTree
 
 import utils
-from code_generator import CodeGenerator
-from grammar import Grammar
+from code_generator.code_generator import CodeGenerator
+from parser.grammar import Grammar
 from code_generator.semantic_analyzer import SemanticAnalyzer
 from utils import NonTerminal, Terminal, TokenType
 from scanner.scanner import Scanner

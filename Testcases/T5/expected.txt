@@ -1,0 +1,5 @@
+PRINT    1
+PRINT    4
+PRINT    9
+PRINT    16
+PRINT    25

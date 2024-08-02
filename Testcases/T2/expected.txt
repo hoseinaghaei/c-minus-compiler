@@ -1,0 +1,3 @@
+PRINT    8
+PRINT    -2
+PRINT    36

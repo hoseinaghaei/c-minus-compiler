@@ -1,5 +1,5 @@
-from code_generator import CodeGenerator
-from semantic_handler import SemanticErrorHandler
+from code_generator.code_generator import CodeGenerator
+from code_generator.semantic_handler import SemanticErrorHandler
 from utils import TokenDTO, ActionSymbol
 
 

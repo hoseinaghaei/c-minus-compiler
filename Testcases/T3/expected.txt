@@ -1,0 +1,6 @@
+PRINT    8
+PRINT    8
+PRINT    8
+PRINT    12
+PRINT    12
+Total memory used: 9

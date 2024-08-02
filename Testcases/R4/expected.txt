@@ -1,0 +1,5 @@
+PRINT    4
+PRINT    4
+PRINT    12
+PRINT    240
+PRINT    2

@@ -1,7 +1,7 @@
-from program import Program
-from machine_state import MachineState
-from action_handler import ActionHandler
-from call_stack import CallStack
+from code_generator.program import Program
+from code_generator.machine_state import MachineState
+from code_generator.action_handler import ActionHandler
+from code_generator.call_stack import CallStack
 from utils import SymbolTable, ActionSymbol, TokenDTO
 
 
